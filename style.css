@@ -1,0 +1,32 @@
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    color: darkblue;
+  }
+
+  #result {
+    font-size: 18px;
+    color: green;
+    margin-top: 20px;
+  }
+
+  #scan-button {
+    font-size: 18px;
+    padding: 10px 20px;
+    background-color: darkblue;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  #scan-button:hover {
+    background-color: lightblue;
+  }
+</style>
