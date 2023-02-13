@@ -10,7 +10,7 @@ FLASK_DEBUG = True
 app = Flask(__name__)
 
 @app.route("/")
-def index():
+def checkin():
     time = datetime.datetime.now().time()
     if time >= datetime.time(6) and time < datetime.time(12):
         greeting = "Goedemorgen"
