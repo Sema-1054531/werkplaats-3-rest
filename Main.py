@@ -3,8 +3,6 @@ from datetime import datetime
 
 import sqlite3
 
-# This demo glues a random database and the Flask framework. If the database file does not exist,
-# a simple demo dataset will be created.
 LISTEN_ALL = "0.0.0.0"
 FLASK_IP = LISTEN_ALL
 FLASK_PORT = 81
