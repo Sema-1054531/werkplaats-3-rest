@@ -10,7 +10,7 @@ FLASK_DEBUG = True
 
 app = Flask(__name__)
 
-conn = sqlite3.connect('./lib/databasewp3.db')
+conn = sqlite3.connect('databasewp3.db')
 
 @app.route("/")
 def qr():
