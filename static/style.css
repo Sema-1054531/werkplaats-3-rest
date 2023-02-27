@@ -1,7 +1,7 @@
 
 		body {
 	font-family: Arial, sans-serif;
-	background-image: url('hoge.jpg'); /* voeg de afbeelding toe */
+	background-image: url('img/hoge.jpg'); /* voeg de afbeelding toe */
 	background-size: cover; /* past de afbeelding aan de grootte van de viewport aan */
 	background-position: center center; /* plaatst de afbeelding in het midden van de viewport */
 }
