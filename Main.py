@@ -22,6 +22,16 @@ def login():
 #def dashboard():
  #   return "Welkom bij het dashboard van Hogeschool Rotterdam!"
 
+@app.route('/rooster')
+def index():
+    return render_template('rooster.html')
+
+@app.route('/opslaan', methods=['POST'])
+def opslaan():
+    data = request.form
+    # Hier kun je de gegevens opslaan in een database of bestand
+    return 'Gegevens opgeslagen'
+
 
 if __name__ == '__main__':
     app.run(debug=True)
