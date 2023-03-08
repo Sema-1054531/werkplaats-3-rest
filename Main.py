@@ -51,6 +51,10 @@ def overzicht_docent():
 def close_checkin():
     return render_template('check_in.html', message="De check-in is gesloten")
 
+@app.route("/aanmelden")
+def check_in_student():
+    return render_template("check-in-form-student.html")
+
 @app.route('/plan_bijeenkomst', methods=['GET', 'POST'])
 def plan_bijeenkomst():
     db = get_db()
