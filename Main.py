@@ -9,16 +9,16 @@ conn = sqlite3.connect('databasewp3.db')
 c = conn.cursor()
 
 # Tabel voor studenten aanmaken als deze nog niet bestaat
-c.execute('''CREATE TABLE IF NOT EXISTS studenten
-             (id INTEGER PRIMARY KEY AUTOINCREMENT,
-              email TEXT NOT NULL,
-              wachtwoord TEXT NOT NULL)''')
-conn.commit()
+#c.execute('''CREATE TABLE IF NOT EXISTS studenten
+             #(id INTEGER PRIMARY KEY AUTOINCREMENT,
+              #email TEXT NOT NULL,
+              #wachtwoord TEXT NOT NULL)''')
+#conn.commit()
 
 # Voorbeeld studenten toevoegen
-c.execute("INSERT INTO studenten (email, wachtwoord) VALUES (?, ?)", ('johndoe@student.com', 'wachtwoord123'))
-c.execute("INSERT INTO studenten (email, wachtwoord) VALUES (?, ?)", ('janedoe@student.com', 'wachtwoord456'))
-conn.commit()
+#c.execute("INSERT INTO studenten (email, wachtwoord) VALUES (?, ?)", ('johndoe@student.com', 'wachtwoord123'))
+#c.execute("INSERT INTO studenten (email, wachtwoord) VALUES (?, ?)", ('janedoe@student.com', 'wachtwoord456'))
+#conn.commit()
 
 
 # Route voor inlogpagina
@@ -28,12 +28,12 @@ def login():
         email = request.form['studentmail']
         wachtwoord = request.form['wachtwoord']
 
-        # Controleren of de ingevoerde e-mail bestaat in de database
-        c.execute("SELECT * FROM studentmail WHERE studentmail = ?", (email,))
+        # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
+        c.execute("SELECT * FROM students WHERE studentmail = ? AND firstname = ?", (email, wachtwoord))
         student = c.fetchone()
 
-        if student is not None and student[2] == wachtwoord:
-            session['studentmail'] = emailgit
+        if student is not None:
+            session['email'] = email
             return redirect('/dashboard')
         else:
             error = "Ongeldige inloggegevens. Probeer het opnieuw."
@@ -46,9 +46,9 @@ def login():
 @app.route('/dashboard')
 def dashboard():
     # Controleren of de gebruiker is ingelogd
-    if 'studentmail' in session:
-        email = session['studentmail']
-        return render_template('dashboard.html', email=email)
+    if 'email' in session:
+        email = session['email']
+        return render_template('dashboardleeraar.html', email=email)
     else:
         return redirect('/')
 
