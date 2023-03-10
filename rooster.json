@@ -1,0 +1,34 @@
+{
+    "maandag": [
+        {
+            "klas": "5A",
+            "vak": "Wiskunde",
+            "begintijd": "08:30",
+            "eindtijd": "09:30",
+            "docent": "Jansen"
+        },
+        {
+            "klas": "5A",
+            "vak": "Nederlands",
+            "begintijd": "09:30",
+            "eindtijd": "10:30",
+            "docent": "Peters"
+        }
+    ],
+    "dinsdag": [
+        {
+            "klas": "5A",
+            "vak": "Geschiedenis",
+            "begintijd": "10:30",
+            "eindtijd": "11:30",
+            "docent": "Kramer"
+        },
+        {
+            "klas": "5A",
+            "vak": "Engels",
+            "begintijd": "13:30",
+            "eindtijd": "14:30",
+            "docent": "Jansen"
+        }
+    ]
+}

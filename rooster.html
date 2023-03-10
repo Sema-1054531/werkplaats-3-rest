@@ -9,27 +9,39 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	<script>
 		$(document).ready(function(){
-			$.ajax({
-				url: "{{ url_for('get_data') }}",
-				type: "GET",
-				success: function(data){
-					$("#schedule").html(data);
-				}
-			});
+    $.ajax({
+        url: "{{ url_for('get_data') }}",
+        type: "GET",
+        success: function(data){
+            $("#schedule").html(data);
+        }
+    });
 
-			$("#form").submit(function(e){
-				e.preventDefault();
-				var formData = $(this).serialize();
-				$.ajax({
-					url: "{{ url_for('update_data') }}",
-					type: "POST",
-					data: formData,
-					success: function(data){
-						$("#schedule").html(data);
-					}
-				});
-			});
-		});
+    $("#form").submit(function(e){
+        e.preventDefault();
+        var formData = $(this).serialize();
+        $.ajax({
+            url: "{{ url_for('update_data') }}",
+            type: "POST",
+            data: formData,
+            success: function(data){
+                $("#schedule").html(data);
+                $.ajax({
+                    url: "{{ url_for('save_data') }}",
+                    type: "POST",
+                    data: data,
+                    success: function(){
+                        console.log("Data opgeslagen in rooster.json");
+                    },
+                    error: function(){
+                        console.log("Er is iets fout gegaan bij het opslaan van de data");
+                    }
+                });
+            }
+        });
+    });
+});
+
 	</script>
 </head>
 <body>
