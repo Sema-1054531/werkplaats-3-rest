@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, json
 import sqlite3
 
 app = Flask(__name__)
@@ -8,17 +8,6 @@ app = Flask(__name__)
 conn = sqlite3.connect('databasewp3.db')
 c = conn.cursor()
 
-# Tabel voor studenten aanmaken als deze nog niet bestaat
-#c.execute('''CREATE TABLE IF NOT EXISTS studenten
-             #(id INTEGER PRIMARY KEY AUTOINCREMENT,
-              #email TEXT NOT NULL,
-              #wachtwoord TEXT NOT NULL)''')
-#conn.commit()
-
-# Voorbeeld studenten toevoegen
-#c.execute("INSERT INTO studenten (email, wachtwoord) VALUES (?, ?)", ('johndoe@student.com', 'wachtwoord123'))
-#c.execute("INSERT INTO studenten (email, wachtwoord) VALUES (?, ?)", ('janedoe@student.com', 'wachtwoord456'))
-#conn.commit()
 
 
 # Route voor inlogpagina
@@ -29,7 +18,7 @@ def login():
         wachtwoord = request.form['wachtwoord']
 
         # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
-        c.execute("SELECT * FROM students WHERE studentmail = ? AND firstname = ?", (email, wachtwoord))
+        c.execute("SELECT * FROM students WHERE studentmail = ? AND wachtwoord = ?", (email, wachtwoord))
         student = c.fetchone()
 
         if student is not None:
@@ -51,6 +40,16 @@ def dashboard():
         return render_template('dashboardleeraar.html', email=email)
     else:
         return redirect('/')
+
+@app.route('/rooster')
+def show_rooster():
+    return render_template('rooster.html')
+@app.route('/save_data', methods=['POST'])
+def save_data():
+    data = request.form.to_dict()
+    with open('rooster.json', 'w') as f:
+        json.dump(data, f)
+    return 'Data succesvol opgeslagen in rooster.json'
 
 
 if __name__ == '__main__':
