@@ -44,6 +44,7 @@ def dashboard():
 @app.route('/rooster')
 def show_rooster():
     return render_template('rooster.html')
+
 @app.route('/save_data', methods=['POST'])
 def save_data():
     data = request.form.to_dict()
