@@ -53,7 +53,37 @@ def close_checkin():
 
 @app.route("/aanmelden")
 def check_in_student():
-    return render_template("check-in-form-student.html")
+    db = get_db()
+
+    if request.method == 'POST':
+        studentid = request.form['studentid']
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
+        progress = request.form['progress']
+        checkin_date = request.form['checkin_date']
+        checkin_time = request.form['checkin_time']
+
+        #validate the input
+        if not studentid:
+            return 'Er ging iets mis met het ophalen van je studentnummer'
+        if not firstname:
+            return 'Vul eerst je naam in'
+        if not lastname:
+            return 'Vul eerst je achternaam in'
+        if not progress:
+            return 'Vergeet niet aan te geven hoe je er voor staat'
+        if not checkin_date:
+            return 'Er ging iets mis met het ophalen van de datum van vandaag'
+        if not checkin_time:
+            return 'Er ging iets mis met het ophalen van de tijd'
+
+        db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time) VALUES (?, ?, ?, ?, ?, ?)",
+                   (studentid, firstname, lastname, progress, checkin_date.strftime('%Y-%m-%d'), checkin_time))
+        db.commit()
+
+        return "Je bent ingescheckt voor vandaag!"
+    meeting = db.execute('SELECT * FROM meeting').fetchall()
+    return render_template("check-in-form-student.html", meeting=meeting)
 
 @app.route('/plan_bijeenkomst', methods=['GET', 'POST'])
 def plan_bijeenkomst():
@@ -64,10 +94,16 @@ def plan_bijeenkomst():
         datemeeting = request.form['datemeeting']
         start_time = request.form['start_time']
         end_time = request.form['end_time']
-        if 'class' in request.form:
-            classid = request.form['class']
+        classids = request.form.getlist('class[]')
+
+        # if 'class' in request.form:
+        #     classid = request.form['class']
+        # else:
+        #     classid = None
+        if 'subject' in request.form:
+            subjectid = request.form['subject']
         else:
-            classid = None
+            subjectid = None
 
         # validate the input
         if not title:
@@ -83,14 +119,25 @@ def plan_bijeenkomst():
         datemeeting = datetime.strptime(request.form['datemeeting'], '%Y-%m-%d')
         if datemeeting.date() < datetime.now().date():
             return 'De datum ligt in het verleden!'
+        if not classids:
+            return 'Selecteer welke klassen je verwacht'
+        if not subjectid:
+            return 'Selecteer voor welke les je deze bijeenkomst maakt'
 
-        db.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, classid) VALUES (?, ?, ?, ?, ?)",
-                   (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, classid))
+        cursor = db.cursor()
+        cursor.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, subjectid) VALUES (?, ?, ?, ?, ?)",
+                   (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, subjectid))
+        meetingid = cursor.lastrowid
+
+        for classid in classids:
+            cursor.execute("INSERT INTO meeting_classes (meetingid, classid) VALUES (?, ?)", (meetingid, classid))
+
         db.commit()
 
         return 'bijeenkomst aangemaakt'
-    classes = db.execute('SELECT * from class').fetchall()
-    return render_template("bijeenkomst_plannen.html", classes=classes)
+    classes = db.execute('SELECT * from class ORDER BY classname').fetchall()
+    subjects = db.execute('SELECT * from subject').fetchall()
+    return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
 
 
 if __name__ == "__main__":
