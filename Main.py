@@ -20,12 +20,15 @@ def get_db():
         db.row_factory = sqlite3.Row
     return db
 
+
 @app.teardown_appcontext
 def close_db(error):
     """Closes the database again at the end of the request."""
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+conn = sqlite3.connect('databasewp3.db')
+
 
 @app.route("/")
 def qr():
