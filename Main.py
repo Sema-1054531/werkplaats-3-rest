@@ -51,7 +51,7 @@ def overzicht_docent():
 def close_checkin():
     return render_template('check_in.html', message="De check-in is gesloten")
 
-@app.route("/aanmelden")
+@app.route("/aanmelden" , methods=['GET', 'POST'])
 def check_in_student():
     db = get_db()
 
@@ -78,7 +78,7 @@ def check_in_student():
             return 'Er ging iets mis met het ophalen van de tijd'
 
         db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time) VALUES (?, ?, ?, ?, ?, ?)",
-                   (studentid, firstname, lastname, progress, checkin_date.strftime('%Y-%m-%d'), checkin_time))
+                   (studentid, firstname, lastname, progress, checkin_date, checkin_time))
         db.commit()
 
         return "Je bent ingescheckt voor vandaag!"

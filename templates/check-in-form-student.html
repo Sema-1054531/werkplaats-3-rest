@@ -8,8 +8,7 @@
 </head>
 <body>
 <div class="container">
-    <form method="post" class="row g-3">
-        <div class="col-12">
+        <form method="post" class="row g-3">        <div class="col-12">
             <h2>{{ title }}</h2>
         </div>
         <div class="col-12">
@@ -49,5 +48,15 @@
 
     </form>
 </div>
+<script>
+    // Get current date and time
+    var now = new Date();
+
+    // Set date and time input values to current date and time
+    var dateInput = document.getElementById('date');
+    dateInput.value = now.toISOString().slice(0,10);
+    var timeInput = document.getElementById('time');
+    timeInput.value = now.toTimeString().slice(0,5);
+</script>
 </body>
 </html>
