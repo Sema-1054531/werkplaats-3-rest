@@ -1,48 +1,94 @@
+<!-- index.html -->
+
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Studentenoverzicht</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>Studentenoverzicht</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
 </head>
 <body>
-  <div class="container">
-    <h2>Studentenoverzicht</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Studentmail</th>
-          <th>Voornaam</th>
-          <th>Achternaam</th>
-        </tr>
-      </thead>
-      <tbody id="studentenlijst">
-      </tbody>
-    </table>
-  </div>
+    <div class="container">
+        <h1>Studentenoverzicht</h1>
+        <hr>
+        <form id="add-student-form">
+            <div class="form-group">
+                <label for="studentmail">Studentmail</label>
+                <input type="email" class="form-control" id="studentmail" name="studentmail" required>
+            </div>
+            <div class="form-group">
+                <label for="firstname">Voornaam</label>
+                <input type="text" class="form-control" id="firstname" name="firstname" required>
+            </div>
+            <div class="form-group">
+                <label for="lastname">Achternaam</label>
+                <input type="text" class="form-control" id="lastname" name="lastname" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Toevoegen</button>
+        </form>
+        <hr>
+        <table id="student-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Voornaam</th>
+                    <th>Achternaam</th>
+                    <th>Studentmail</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script>
+        $(function() {
+            loadStudents();
 
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-    $(document).ready(function() {
-      $.ajax({
-        url: 'studenten.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-          var studentenlijst = '';
-          $.each(data, function(index, value) {
-            studentenlijst += '<tr>' +
-                              '<td>' + value.studentmail + '</td>' +
-                              '<td>' + value.firstname + '</td>' +
-                              '<td>' + value.lastname + '</td>' +
-                              '</tr>';
-          });
+            $('#add-student-form').submit(function(event) {
+                event.preventDefault();
+                var studentmail = $('#studentmail').val();
+                var firstname = $('#firstname').val();
+                var lastname = $('#lastname').val();
+                $.ajax({
+                    url: '/add_student',
+                    type: 'POST',
+                    data: {
+                        studentmail: studentmail,
+                        firstname: firstname,
+                        lastname: lastname
+                    },
+                    success: function(response) {
+                        $('#studentmail').val('');
+                        $('#firstname').val('');
+                        $('#lastname').val('');
+                        loadStudents();
+                    }
+                });
+            });
 
-          $('#studentenlijst').html(studentenlijst);
-        }
-      });
-    });
-  </script>
+
+            function loadStudents() {
+                $.ajax({
+                    url: '/get_students',
+                    type: 'GET',
+                    success: function(response) {
+                        var tbody = $('#student-table tbody');
+                        tbody.empty();
+                        for (var i = 0; i < response.length; i++) {
+                            var student = response[i];
+                            var row = '<tr>' +
+                                      '<td>' + student[1] + '</td>' +
+                                      '<td>' + student[2] + '</td>' +
+                                      '<td>' + student[3] + '</td>' +
+                                      '</tr>';
+                            tbody.append(row);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

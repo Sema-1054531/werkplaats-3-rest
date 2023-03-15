@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, redirect, session, json
+from flask import Flask, render_template, request, redirect, session, json, jsonify
 import sqlite3
 
 app = Flask(__name__)
@@ -8,6 +8,41 @@ app = Flask(__name__)
 # Verbinding maken met de database
 conn = sqlite3.connect('databasewp3.db')
 c = conn.cursor()
+
+
+
+# Stel de route in voor het renderen van het sjabloon
+@app.route('/')
+def index():
+    return render_template('studentenoverzicht.html')
+
+
+# Stel de route in voor het toevoegen van een student
+@app.route('/add_student', methods=['POST'])
+def add_student():
+    studentmail = request.form['studentmail']
+    firstname = request.form['firstname']
+    lastname = request.form['lastname']
+    conn = sqlite3.connect('databasewp3.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO students (studentmail, firstname, lastname) VALUES (?, ?, ?)",
+              (studentmail, firstname, lastname))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+
+
+@app.route('/get_students', methods=['GET'])
+def get_students():
+    conn = sqlite3.connect('databasewp3.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM students")
+    students = c.fetchall()
+    conn.close()
+    return jsonify(students)
+
+
 
 
 
