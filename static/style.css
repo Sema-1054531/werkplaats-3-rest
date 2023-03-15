@@ -1,4 +1,5 @@
 
+
 		body {
 	font-family: Arial, sans-serif;
 	background-image: url('img/hoge.jpg'); /* voeg de afbeelding toe */
@@ -77,4 +78,9 @@ input::-moz-placeholder {
 input:-ms-input-placeholder {
 	color: #ccc;
 	font-style: italic;
+}
+body{
+    background-color: #fff7ea;
+    font-family: Poppins,sans-serif;
+
 }

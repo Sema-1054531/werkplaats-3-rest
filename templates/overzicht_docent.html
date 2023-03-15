@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <button id="close-checkin">Check-in sluiten</button>
+
+<script>
+    $(document).ready(function () {
+        $("#close-checkin").click(function() {
+            $.ajax({
+                type: "POST",
+                url: "/close_checkin",
+                success: function (response) {
+                    $("#greeting").text("De check-in is gesloten");
+                    $("#qr_image").remove();
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
