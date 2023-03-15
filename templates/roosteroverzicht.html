@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Roosteroverzicht</title>
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+</head>
+<body>
+	<div class="container">
+		<h1 class="mt-4 mb-4">Roosteroverzicht</h1>
+		<button class="btn btn-primary mb-4" onclick="haalRoosterOp()">Rooster ophalen</button>
+		<table class="table table-striped" id="rooster">
+			<thead>
+				<tr>
+					<th scope="col">Dag</th>
+					<th scope="col">Klas</th>
+					<th scope="col">Schoolvak</th>
+					<th scope="col">Begintijd</th>
+					<th scope="col">Eindtijd</th>
+					<th scope="col">Docent</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+	<!-- jQuery and Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+	<script>
+		function haalRoosterOp() {
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					var rooster = JSON.parse(this.responseText);
+					var roosterTable = document.getElementById("rooster").getElementsByTagName('tbody')[0];
+					for (var i = 0; i < rooster.length; i++) {
+						var rij = rooster[i];
+						var rijElement = document.createElement("tr");
+						var dagElement = document.createElement("td");
+						var klasElement = document.createElement("td");
+						var vakElement = document.createElement("td");
+						var startElement = document.createElement("td");
+						var eindElement = document.createElement("td");
+						var docentElement = document.createElement("td");
+						dagElement.innerHTML = rij.dag;
+						klasElement.innerHTML = rij.klas;
+						vakElement.innerHTML = rij.vak;
+						startElement.innerHTML = rij.start;
+						eindElement.innerHTML = rij.eind;
+						docentElement.innerHTML = rij.docent;
+						rijElement.appendChild(dagElement);
+						rijElement.appendChild(klasElement);
+						rijElement.appendChild(vakElement);
+						rijElement.appendChild(startElement);
+						rijElement.appendChild(eindElement);
+						rijElement.appendChild(docentElement);
+						roosterTable.appendChild(rijElement);
+					}
+				}
+			};
+			xmlhttp.open("GET", "static/rooster.json", true);
+			xmlhttp.send();
+		}
+	</script>
+</body>
+</html>

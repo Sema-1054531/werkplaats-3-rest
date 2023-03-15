@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QR Code Scanner</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    color: darkblue;
+  }
+
+  #result {
+    font-size: 18px;
+    color: green;
+    margin-top: 20px;
+  }
+
+  #scan-button {
+    font-size: 18px;
+    padding: 10px 20px;
+    background-color: darkblue;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  #scan-button:hover {
+    background-color: lightblue;
+  }
+</style>
+
+</head>
+<body>
+  <h1>QR Code Scanner</h1>
+  <div id="result"></div>
+  <button id="scan-button">Scan QR Code</button>
+  <script>
+    const scanButton = document.getElementById("scan-button");
+    const resultDiv = document.getElementById("result");
+    scanButton.addEventListener("click", () => {
+      // Code voor het scannen van een QR-code
+      const studentId = "12345";
+      resultDiv.innerHTML = "Student ID: " + studentId;
+      // Verstuur de informatie naar de server
+      fetch("http://localhost:5000/checkin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          student_id: studentId
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          resultDiv.innerHTML += "<br>Server response: " + data.message;
+        })
+        .catch(error => {
+          resultDiv.innerHTML += "<br>Error: " + error;
+        });
+    });
+  </script>
+</body>
+</html>
