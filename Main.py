@@ -15,10 +15,10 @@ c = conn.cursor()
 def login():
     if request.method == 'POST':
         email = request.form['studentmail']
-        wachtwoord = request.form['wachtwoord']
+        wachtwoord = request.form['password']
 
         # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
-        c.execute("SELECT * FROM students WHERE studentmail = ? AND wachtwoord = ?", (email, wachtwoord))
+        c.execute("SELECT * FROM students WHERE studentmail = ? AND password = ?", (email, wachtwoord))
         student = c.fetchone()
 
         if student is not None:
@@ -45,10 +45,14 @@ def dashboard():
 def show_rooster():
     return render_template('rooster.html')
 
+@app.route('/roosteroverzicht')
+def show_roosteroverzicht():
+    return render_template('roosteroverzicht.html')
+
 @app.route('/save_data', methods=['POST'])
 def save_data():
     data = request.form.to_dict()
-    with open('rooster.json', 'w') as f:
+    with open('static/rooster.json', 'w') as f:
         json.dump(data, f)
     return 'Data succesvol opgeslagen in rooster.json'
 

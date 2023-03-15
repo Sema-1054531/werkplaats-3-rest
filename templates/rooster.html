@@ -10,7 +10,7 @@
 	<script>
 		$(document).ready(function(){
     $.ajax({
-        url: "{{ url_for('get_data') }}",
+        url: "/static/rooster.json",
         type: "GET",
         success: function(data){
             $("#schedule").html(data);
@@ -21,13 +21,13 @@
         e.preventDefault();
         var formData = $(this).serialize();
         $.ajax({
-            url: "{{ url_for('update_data') }}",
+            url: "/static/rooster.json",
             type: "POST",
             data: formData,
             success: function(data){
                 $("#schedule").html(data);
                 $.ajax({
-                    url: "{{ url_for('save_data') }}",
+                    url: "/static/rooster.json",
                     type: "POST",
                     data: data,
                     success: function(){
