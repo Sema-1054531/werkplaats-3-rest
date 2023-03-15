@@ -1,10 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <title>Studentenoverzicht</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
-$END$
+  <div class="container">
+    <h2>Studentenoverzicht</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Studentmail</th>
+          <th>Voornaam</th>
+          <th>Achternaam</th>
+        </tr>
+      </thead>
+      <tbody id="studentenlijst">
+      </tbody>
+    </table>
+  </div>
+
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $.ajax({
+        url: 'studenten.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          var studentenlijst = '';
+          $.each(data, function(index, value) {
+            studentenlijst += '<tr>' +
+                              '<td>' + value.studentmail + '</td>' +
+                              '<td>' + value.firstname + '</td>' +
+                              '<td>' + value.lastname + '</td>' +
+                              '</tr>';
+          });
+
+          $('#studentenlijst').html(studentenlijst);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
