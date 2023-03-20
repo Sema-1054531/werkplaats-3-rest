@@ -1,26 +1,47 @@
+from flask import Flask, render_template, request, jsonify, g, redirect, session, json
+from datetime import datetime
 
-from flask import Flask, render_template, request, redirect, session, json
 import sqlite3
+import os
 
 app = Flask(__name__)
+app.config['DATABASE'] = os.path.join(os.getcwd(), 'lib/databasewp3.db')
+
+LISTEN_ALL = "0.0.0.0"
+FLASK_IP = LISTEN_ALL
+FLASK_PORT = 81
+FLASK_DEBUG = True
+
+def get_db():
+    """Opens a new database connection if there is none  yet for the current application context."""
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(app.config['DATABASE'])
+        db.row_factory = sqlite3.Row
+    return db
 
 
-# Verbinding maken met de database
+@app.teardown_appcontext
+def close_db(error):
+    """Closes the database again at the end of the request."""
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 conn = sqlite3.connect('databasewp3.db')
-c = conn.cursor()
-
 
 
 # Route voor inlogpagina
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    db = get_db()
+
     if request.method == 'POST':
         email = request.form['studentmail']
         wachtwoord = request.form['password']
 
         # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
-        c.execute("SELECT * FROM students WHERE studentmail = ? AND password = ?", (email, wachtwoord))
-        student = c.fetchone()
+        db.execute("SELECT * FROM students WHERE studentmail = ? AND password = ?", (email, wachtwoord))
+        student = db.fetchone()
 
         if student is not None:
             session['email'] = email
@@ -56,41 +77,6 @@ def save_data():
     with open('static/rooster.json', 'w') as f:
         json.dump(data, f)
     return 'Data succesvol opgeslagen in rooster.json'
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-from flask import Flask, render_template, request, jsonify, g
-from datetime import datetime
-
-import sqlite3
-import os
-
-app = Flask(__name__)
-app.config['DATABASE'] = os.path.join(os.getcwd(), 'lib/databasewp3.db')
-
-LISTEN_ALL = "0.0.0.0"
-FLASK_IP = LISTEN_ALL
-FLASK_PORT = 81
-FLASK_DEBUG = True
-
-def get_db():
-    """Opens a new database connection if there is none  yet for the current application context."""
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(app.config['DATABASE'])
-        db.row_factory = sqlite3.Row
-    return db
-
-
-@app.teardown_appcontext
-def close_db(error):
-    """Closes the database again at the end of the request."""
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
-conn = sqlite3.connect('databasewp3.db')
 
 
 @app.route("/")
