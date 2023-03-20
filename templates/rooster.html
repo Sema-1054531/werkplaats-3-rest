@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Rooster</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" type="text/css" href="../static/sty.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script>
+		$(document).ready(function(){
+    $.ajax({
+        url: "/static/rooster.json",
+        type: "GET",
+        success: function(data){
+            $("#schedule").html(data);
+        }
+    });
+
+    $("#form").submit(function(e){
+        e.preventDefault();
+        var formData = $(this).serialize();
+        $.ajax({
+            url: "/static/rooster.json",
+            type: "POST",
+            data: formData,
+            success: function(data){
+                $("#schedule").html(data);
+                $.ajax({
+                    url: "/static/rooster.json",
+                    type: "POST",
+                    data: data,
+                    success: function(){
+                        console.log("Data opgeslagen in rooster.json");
+                    },
+                    error: function(){
+                        console.log("Er is iets fout gegaan bij het opslaan van de data");
+                    }
+                });
+            }
+        });
+    });
+});
+
+	</script>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8 col-md-offset-2">
+				<h1 class="text-center">Rooster</h1>
+				<div id="schedule"></div>
+				<form id="form">
+					<div class="form-group">
+						<label for="day">Dag:</label>
+						<select class="form-control" name="day" id="day">
+							<option value="maandag">Maandag</option>
+							<option value="dinsdag">Dinsdag</option>
+							<option value="woensdag">Woensdag</option>
+							<option value="donderdag">Donderdag</option>
+							<option value="vrijdag">Vrijdag</option>
+							<option value="zaterdag">Zaterdag</option>
+							<option value="zondag">Zondag</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="start_time">Starttijd:</label>
+						<input type="time" class="form-control" name="start_time" id="start_time">
+					</div>
+					<div class="form-group">
+						<label for="end_time">Eindtijd:</label>
+						<input type="time" class="form-control" name="end_time" id="end_time">
+					</div>
+					<div class="form-group">
+						<label for="activity">Activiteit:</label>
+						<input type="text" class="form-control" name="activity" id="activity">
+					</div>
+					<button type="submit" class="btn btn-primary">Opslaan</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

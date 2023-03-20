@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, render_template, request, jsonify, g, redirect, session, json
 from datetime import datetime
 
 import sqlite3
@@ -28,6 +28,55 @@ def close_db(error):
     if db is not None:
         db.close()
 conn = sqlite3.connect('databasewp3.db')
+
+
+# Route voor inlogpagina
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    db = get_db()
+
+    if request.method == 'POST':
+        email = request.form['studentmail']
+        wachtwoord = request.form['password']
+
+        # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
+        db.execute("SELECT * FROM students WHERE studentmail = ? AND password = ?", (email, wachtwoord))
+        student = db.fetchone()
+
+        if student is not None:
+            session['email'] = email
+            return redirect('/dashboard')
+        else:
+            error = "Ongeldige inloggegevens. Probeer het opnieuw."
+            return render_template('login.html', error=error)
+    else:
+        return render_template('login.html')
+
+
+# Route voor dashboardpagina
+@app.route('/dashboard')
+def dashboard():
+    # Controleren of de gebruiker is ingelogd
+    if 'email' in session:
+        email = session['email']
+        return render_template('dashboardleeraar.html', email=email)
+    else:
+        return redirect('/')
+
+@app.route('/rooster')
+def show_rooster():
+    return render_template('rooster.html')
+
+@app.route('/roosteroverzicht')
+def show_roosteroverzicht():
+    return render_template('roosteroverzicht.html')
+
+@app.route('/save_data', methods=['POST'])
+def save_data():
+    data = request.form.to_dict()
+    with open('static/rooster.json', 'w') as f:
+        json.dump(data, f)
+    return 'Data succesvol opgeslagen in rooster.json'
 
 
 @app.route("/")
@@ -145,3 +194,4 @@ def plan_bijeenkomst():
 
 if __name__ == "__main__":
     app.run(host=FLASK_IP, port=FLASK_PORT, debug=FLASK_DEBUG)
+
