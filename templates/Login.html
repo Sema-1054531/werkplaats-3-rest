@@ -2,13 +2,35 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../static/style.css">
-    <title>Hogeschool Rotterdam - Login</title></head>
+    <title>Hogeschool Rotterdam - Login</title>
+</head>
 <body>
-<form method="post">
-    <h1>Hogeschool Rotterdam - Login</h1>
-    <label for="studentmail">Student email:</label>
-    <input type="text" name="studentmail" placeholder="Vul uw student email in" required>
-    <label for="firstname">Wachtwoord:</label>
-    <input type="password" name="password" placeholder="Vul uw wachtwoord in" required>
-    <input type="submit" value="Inloggen">
-</form>
+    <script>
+        const form = document.createElement('form');
+        form.method = 'post';
+
+        const h1 = document.createElement('h1');
+        h1.textContent = 'Hogeschool Rotterdam - Login';
+        form.appendChild(h1);
+
+        const labelEmail = document.createElement('label');
+        labelEmail.htmlFor = 'studentmail';
+        labelEmail.textContent = 'Student email:';
+        form.appendChild(labelEmail);
+
+        const inputEmail = document.createElement('input');
+        inputEmail.type = 'text';
+        inputEmail.name = 'studentmail';
+        inputEmail.placeholder = 'Vul uw student email in';
+        inputEmail.required = true;
+        form.appendChild(inputEmail);
+
+        const submitBtn = document.createElement('input');
+        submitBtn.type = 'submit';
+        submitBtn.value = 'Inloggen';
+        form.appendChild(submitBtn);
+
+        document.body.appendChild(form);
+    </script>
+</body>
+</html>

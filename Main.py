@@ -12,8 +12,8 @@ c = conn.cursor()
 
 
 # Stel de route in voor het renderen van het sjabloon
-@app.route('/')
-def index():
+@app.route('/studentenoverzicht')
+def studentenoverzicht():
     return render_template('studentenoverzicht.html')
 
 
@@ -49,22 +49,24 @@ def get_students():
 # Route voor inlogpagina
 @app.route('/', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        email = request.form['studentmail']
-        wachtwoord = request.form['password']
+    studentmail = request.form['studentmail']
 
-        # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
-        c.execute("SELECT * FROM students WHERE studentmail = ? AND password = ?", (email, wachtwoord))
-        student = c.fetchone()
+    # connect to the database
+    conn = sqlite3.connect('databasewp3.db')
+    c = conn.cursor()
 
-        if student is not None:
-            session['email'] = email
-            return redirect('/dashboard')
-        else:
-            error = "Ongeldige inloggegevens. Probeer het opnieuw."
-            return render_template('login.html', error=error)
+    # check if the student email exists in the database
+    c.execute("SELECT * FROM students WHERE studentmail =?", (studentmail,))
+    result = c.fetchone()
+    if result is None:
+        return 'Invalid student email'
     else:
-        return render_template('login.html')
+        # do something with the student data, such as checking the password
+        # and redirecting to a new page if the login is successful
+        return 'Login successful'
+
+    # close the database connection
+    conn.close()
 
 
 # Route voor dashboardpagina
