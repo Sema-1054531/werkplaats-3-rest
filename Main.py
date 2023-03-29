@@ -1,24 +1,19 @@
 from flask import Flask, render_template, request, jsonify, g, redirect, session, json
 from datetime import datetime
 
+from database import get_db
+
 import sqlite3
 import os
 
 app = Flask(__name__)
 app.config['DATABASE'] = os.path.join(os.getcwd(), 'lib/databasewp3.db')
+app.secret_key = os.urandom(24)
 
 LISTEN_ALL = "0.0.0.0"
 FLASK_IP = LISTEN_ALL
 FLASK_PORT = 81
 FLASK_DEBUG = True
-
-def get_db():
-    """Opens a new database connection if there is none  yet for the current application context."""
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(app.config['DATABASE'])
-        db.row_factory = sqlite3.Row
-    return db
 
 
 @app.teardown_appcontext
@@ -27,61 +22,15 @@ def close_db(error):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+
+
 conn = sqlite3.connect('databasewp3.db')
 
 
-# Route voor inlogpagina
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    db = get_db()
-
-    if request.method == 'POST':
-        email = request.form['studentmail']
-        wachtwoord = request.form['password']
-
-        # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
-        db.execute("SELECT * FROM students WHERE studentmail = ? AND password = ?", (email, wachtwoord))
-        student = db.fetchone()
-
-        if student is not None:
-            session['email'] = email
-            return redirect('/dashboard')
-        else:
-            error = "Ongeldige inloggegevens. Probeer het opnieuw."
-            return render_template('login.html', error=error)
-    else:
-        return render_template('login.html')
-
-
-# Route voor dashboardpagina
-@app.route('/dashboard')
-def dashboard():
-    # Controleren of de gebruiker is ingelogd
-    if 'email' in session:
-        email = session['email']
-        return render_template('dashboardleeraar.html', email=email)
-    else:
-        return redirect('/')
-
-@app.route('/rooster')
-def show_rooster():
-    return render_template('rooster.html')
-
-@app.route('/roosteroverzicht')
-def show_roosteroverzicht():
-    return render_template('roosteroverzicht.html')
-
-@app.route('/save_data', methods=['POST'])
-def save_data():
-    data = request.form.to_dict()
-    with open('static/rooster.json', 'w') as f:
-        json.dump(data, f)
-    return 'Data succesvol opgeslagen in rooster.json'
-
-
 @app.route("/")
-def qr():
+def index():
     return render_template('check_in.html', greeting=get_greeting())
+
 
 # makes greeting based on current time
 def get_greeting():
@@ -94,6 +43,62 @@ def get_greeting():
         return 'Goedenavond'
 
 
+# Route voor inlogpagina
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    db = get_db()
+
+    if request.method == 'POST':
+        studentid = request.form['studentid']
+        cursor = db.cursor()
+        # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
+        cursor.execute("SELECT studentid FROM students WHERE studentid = ?", (studentid,))
+        student = cursor.fetchone()
+
+        if student is not None:
+            session['studentid'] = studentid
+            return redirect('/roosteroverzicht_student')
+        else:
+            error = "Ongeldige inloggegevens. Probeer het opnieuw."
+            return render_template('login.html', error=error)
+    else:
+        return render_template('login.html')
+
+@app.route('/loguit')
+def logout():
+    session.pop('studentid', None)
+    return redirect('/login')
+
+
+# Route voor dashboardpagina
+@app.route('/dashboard')
+def dashboard():
+    # Controleren of de gebruiker is ingelogd
+    if 'email' in session:
+        email = session['email']
+        return render_template('dashboardleeraar.html', email=email)
+    else:
+        return redirect('/')
+
+
+@app.route('/rooster')
+def show_rooster():
+    return render_template('rooster.html')
+
+
+@app.route('/roosteroverzicht')
+def show_roosteroverzicht():
+    return render_template('roosteroverzicht.html')
+
+
+@app.route('/save_data', methods=['POST'])
+def save_data():
+    data = request.form.to_dict()
+    with open('static/rooster.json', 'w') as f:
+        json.dump(data, f)
+    return 'Data succesvol opgeslagen in rooster.json'
+
+
 @app.route("/overzicht_docent")
 def overzicht_docent():
     return render_template("overzicht_docent.html")
@@ -102,6 +107,7 @@ def overzicht_docent():
 @app.route("/close_checkin", methods=['POST'])
 def close_checkin():
     return render_template('check_in.html', message="De check-in is gesloten")
+
 
 @app.route("/aanmelden" , methods=['GET', 'POST'])
 def check_in_student():
@@ -136,6 +142,7 @@ def check_in_student():
         return "Je bent ingescheckt voor vandaag!"
     meeting = db.execute('SELECT * FROM meeting').fetchall()
     return render_template("check-in-form-student.html", meeting=meeting)
+
 
 @app.route('/plan_bijeenkomst', methods=['GET', 'POST'])
 def plan_bijeenkomst():
@@ -190,6 +197,53 @@ def plan_bijeenkomst():
     classes = db.execute('SELECT * from class ORDER BY classname').fetchall()
     subjects = db.execute('SELECT * from subject').fetchall()
     return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
+
+
+@app.route('/api/roosteroverzicht_student/<int:studentid>')
+def api_rooster_student(studentid):
+    # check if student is logged in
+    if 'studentid' in session and session['studentid'] == studentid:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("""
+            SELECT meeting.title, meeting.datemeeting, meeting.start_time, meeting.end_time, teacher.firstname, subject.subjectname
+            FROM meeting
+            JOIN meeting_classes ON meeting.meetingid = meeting_classes.meetingid
+            JOIN students ON meeting_classes.classid = students.classid
+            JOIN teacher ON meeting.teacherid = teacher.teacherid
+            JOIN subject ON meeting.subjectid = subject.subjectid
+            WHERE students.studentid = ?
+            ORDER BY meeting.datemeeting, meeting.start_time
+        """, (studentid,))
+        rooster = cursor.fetchall()
+        rooster_dict = []
+        for row in rooster:
+            rooster_dict.append({
+                'title': row[0],
+                'datemeeting': row[1],
+                'start_time': row[2],
+                'end_time': row[3],
+                'teacher': row[4],
+                'subject': row[5]
+            })
+        return jsonify(rooster_dict)
+    else:
+        return jsonify({'message': 'Unauthorized access.'}), 401
+
+@app.route('/roosteroverzicht_student')
+def rooster_student():
+    # check if student is logged in
+    if 'studentid' in session:
+        studentid = session['studentid']
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("SELECT firstname, lastname FROM students WHERE studentid = ?", (studentid,))
+        student = cursor.fetchone()
+        if student is not None:
+            firstname, lastname = student
+            name = f"{firstname} {lastname}"
+            return render_template('roosteroverzicht_student.html', name=name)
+    return redirect('/login')
 
 
 if __name__ == "__main__":
