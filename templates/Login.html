@@ -3,34 +3,22 @@
 <head>
     <link rel="stylesheet" type="text/css" href="../static/style.css">
     <title>Hogeschool Rotterdam - Login</title>
+    <script>
+        // JavaScript code goes here
+        var form = document.querySelector("form");
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+            var studentmail = document.getElementById("studentmail").value;
+            alert("You entered: " + studentmail);
+        });
+    </script>
 </head>
 <body>
-    <script>
-        const form = document.createElement('form');
-        form.method = 'post';
-
-        const h1 = document.createElement('h1');
-        h1.textContent = 'Hogeschool Rotterdam - Login';
-        form.appendChild(h1);
-
-        const labelEmail = document.createElement('label');
-        labelEmail.htmlFor = 'studentmail';
-        labelEmail.textContent = 'Student email:';
-        form.appendChild(labelEmail);
-
-        const inputEmail = document.createElement('input');
-        inputEmail.type = 'text';
-        inputEmail.name = 'studentmail';
-        inputEmail.placeholder = 'Vul uw student email in';
-        inputEmail.required = true;
-        form.appendChild(inputEmail);
-
-        const submitBtn = document.createElement('input');
-        submitBtn.type = 'submit';
-        submitBtn.value = 'Inloggen';
-        form.appendChild(submitBtn);
-
-        document.body.appendChild(form);
-    </script>
+    <form method="post">
+        <h1>Hogeschool Rotterdam - Login</h1>
+        <label for="studentmail">Studentmail</label>
+        <input type="text" name="studentmail" id="studentmail" placeholder="Vul uw student email in" required>
+        <input type="submit" value="Inloggen">
+    </form>
 </body>
 </html>

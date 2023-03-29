@@ -49,24 +49,27 @@ def get_students():
 # Route voor inlogpagina
 @app.route('/', methods=['GET', 'POST'])
 def login():
-    studentmail = request.form['studentmail']
+    if request.method == 'POST':
+     studentmail = request.form['studentmail']
 
     # connect to the database
-    conn = sqlite3.connect('databasewp3.db')
-    c = conn.cursor()
+     conn = sqlite3.connect('databasewp3.db')
+     c = conn.cursor()
 
     # check if the student email exists in the database
-    c.execute("SELECT * FROM students WHERE studentmail =?", (studentmail,))
-    result = c.fetchone()
-    if result is None:
-        return 'Invalid student email'
-    else:
-        # do something with the student data, such as checking the password
-        # and redirecting to a new page if the login is successful
-        return 'Login successful'
+     c.execute("SELECT * FROM students WHERE studentmail=?", (studentmail,))
+     result = c.fetchone()
+     if result is None:
+         return render_template('login.html', error='Invalid student email')
+     else:
+         # do something with the student data, such as checking the password
+         # and redirecting to a new page if the login is successful
+         return render_template('dashboardstudent.html')
 
-    # close the database connection
-    conn.close()
+         # close the database connection
+     conn.close()
+    else:
+     return render_template('login.html')
 
 
 # Route voor dashboardpagina
