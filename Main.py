@@ -42,7 +42,15 @@ def get_students():
     conn.close()
     return jsonify(students)
 
-
+@app.route('/delete_student', methods=['POST'])
+def delete_student():
+    student_id = request.form['student_id']
+    conn = sqlite3.connect('databasewp3.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM students WHERE student_id = ?', (student_id,))
+    conn.commit()
+    conn.close()
+    return 'OK'
 
 
 

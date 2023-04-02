@@ -68,7 +68,6 @@
                 });
             });
 
-
             function loadStudents() {
                 $.ajax({
                     url: '/get_students',
@@ -82,9 +81,21 @@
                                       '<td>' + student[1] + '</td>' +
                                       '<td>' + student[2] + '</td>' +
                                       '<td>' + student[3] + '</td>' +
+                                      '<td><button class="btn btn-danger btn-delete" data-id="' + student[0] + '" data-student-id="' + student[0] + '">Delete</button></td>' +
                                       '</tr>';
                             tbody.append(row);
                         }
+                        $('.btn-delete').click(function() {
+                            var id = $(this).data('student-id');
+                            $.ajax({
+                                url: '/delete_student',
+                                type: 'POST',
+                                data: { id: id },
+                                success: function(response) {
+                                    loadStudents();
+                                }
+                             });
+                            });
                     }
                 });
             }
