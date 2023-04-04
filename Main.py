@@ -24,7 +24,7 @@ def close_db(error):
         db.close()
 
 
-conn = sqlite3.connect('databasewp3.db')
+conn = sqlite3.connect('lib/databasewp3.db')
 
 
 @app.route("/")
@@ -109,41 +109,6 @@ def close_checkin():
     return render_template('check_in.html', message="De check-in is gesloten")
 
 
-@app.route("/aanmelden" , methods=['GET', 'POST'])
-def check_in_student():
-    db = get_db()
-
-    if request.method == 'POST':
-        studentid = request.form['studentid']
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
-        progress = request.form['progress']
-        checkin_date = request.form['checkin_date']
-        checkin_time = request.form['checkin_time']
-
-        #validate the input
-        if not studentid:
-            return 'Er ging iets mis met het ophalen van je studentnummer'
-        if not firstname:
-            return 'Vul eerst je naam in'
-        if not lastname:
-            return 'Vul eerst je achternaam in'
-        if not progress:
-            return 'Vergeet niet aan te geven hoe je er voor staat'
-        if not checkin_date:
-            return 'Er ging iets mis met het ophalen van de datum van vandaag'
-        if not checkin_time:
-            return 'Er ging iets mis met het ophalen van de tijd'
-
-        db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time) VALUES (?, ?, ?, ?, ?, ?)",
-                   (studentid, firstname, lastname, progress, checkin_date, checkin_time))
-        db.commit()
-
-        return "Je bent ingescheckt voor vandaag!"
-    meeting = db.execute('SELECT * FROM meeting').fetchall()
-    return render_template("check-in-form-student.html", meeting=meeting)
-
-
 @app.route('/plan_bijeenkomst', methods=['GET', 'POST'])
 def plan_bijeenkomst():
     db = get_db()
@@ -197,6 +162,40 @@ def plan_bijeenkomst():
     classes = db.execute('SELECT * from class ORDER BY classname').fetchall()
     subjects = db.execute('SELECT * from subject').fetchall()
     return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
+
+@app.route("/aanmelden" , methods=['GET', 'POST'])
+def check_in_student():
+    db = get_db()
+
+    if request.method == 'POST':
+        studentid = request.form['studentid']
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
+        progress = request.form['progress']
+        checkin_date = request.form['checkin_date']
+        checkin_time = request.form['checkin_time']
+
+        #validate the input
+        if not studentid:
+            return 'Er ging iets mis met het ophalen van je studentnummer'
+        if not firstname:
+            return 'Vul eerst je naam in'
+        if not lastname:
+            return 'Vul eerst je achternaam in'
+        if not progress:
+            return 'Vergeet niet aan te geven hoe je er voor staat'
+        if not checkin_date:
+            return 'Er ging iets mis met het ophalen van de datum van vandaag'
+        if not checkin_time:
+            return 'Er ging iets mis met het ophalen van de tijd'
+
+        db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time) VALUES (?, ?, ?, ?, ?, ?)",
+                   (studentid, firstname, lastname, progress, checkin_date, checkin_time))
+        db.commit()
+
+        return "Je bent ingescheckt voor vandaag!"
+    meeting = db.execute('SELECT * FROM meeting').fetchall()
+    return render_template("check-in-form-student.html", meeting=meeting)
 
 
 @app.route('/api/roosteroverzicht_student/<int:studentid>')
