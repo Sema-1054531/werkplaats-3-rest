@@ -44,31 +44,33 @@
             </tbody>
 		</table>
 	</div>
-<script>
-    // Get studentid from session
-    const studentid = {{ studentid }};
 
-    // get meeting data from the api
-    const url = `/api/roosteroverzicht_student/${studentid}`;
 
-    async function getRoosterData() {
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            const rooster = document.getElementById('rooster');
-
-            // add every row from the table
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML =`<td>${row.title}</td><td>${row.subjectname}</td><td>${row.datemeeting}</td><td>${row.start_time}</td><td>${row.end_time}</td><td>${row.teachername}</td>`;
-                rooster.appendChild(tr);
-            });
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    getRoosterData();
-</script>
+{#<script>#}
+{#    // Get studentid from session#}
+{#    const studentid = {{ studentid }};#}
+{##}
+{#    // get meeting data from the api#}
+{#    const url = `/api/roosteroverzicht_student/${studentid}`;#}
+{##}
+{#    async function getRoosterData() {#}
+{#        try {#}
+{#            const response = await fetch(url);#}
+{#            const data = await response.json();#}
+{#            const rooster = document.getElementById('rooster');#}
+{##}
+{#            // add every row from the table#}
+{#            data.forEach(row => {#}
+{#                const tr = document.createElement('tr');#}
+{#                tr.innerHTML =`<td>${row.title}</td><td>${row.subjectname}</td><td>${row.datemeeting}</td><td>${row.start_time}</td><td>${row.end_time}</td><td>${row.teachername}</td>`;#}
+{#                rooster.appendChild(tr);#}
+{#            });#}
+{#        } catch (error) {#}
+{#            console.error(error);#}
+{#        }#}
+{#    }#}
+{##}
+{#    getRoosterData();#}
+{#</script>#}
 </body>
 </html>
