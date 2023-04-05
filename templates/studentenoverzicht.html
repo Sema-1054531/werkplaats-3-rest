@@ -67,6 +67,16 @@
                     }
                 });
             });
+            $('#student-table').on('click', '.btn-delete', function() {
+                var studentid = $(this).data('studentid');
+                $.ajax({
+                    url: '/delete_student/' + studentid,
+                    type: 'DELETE',
+                    success: function(response) {
+                        loadStudents();
+                    }
+                });
+            });
 
             function loadStudents() {
                 $.ajax({
@@ -81,21 +91,10 @@
                                       '<td>' + student[1] + '</td>' +
                                       '<td>' + student[2] + '</td>' +
                                       '<td>' + student[3] + '</td>' +
-                                      '<td><button class="btn btn-danger btn-delete" data-id="' + student[0] + '" data-student-id="' + student[0] + '">Delete</button></td>' +
+                                      '<td><button class="btn btn-danger btn-delete" data-studentid="' + student[0] + '">Verwijderen</button></td>' +
                                       '</tr>';
                             tbody.append(row);
                         }
-                        $('.btn-delete').click(function() {
-                            var id = $(this).data('student-id');
-                            $.ajax({
-                                url: '/delete_student',
-                                type: 'POST',
-                                data: { id: id },
-                                success: function(response) {
-                                    loadStudents();
-                                }
-                             });
-                            });
                     }
                 });
             }

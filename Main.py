@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 
 # Verbinding maken met de database
-conn = sqlite3.connect('databasewp3.db')
+conn = sqlite3.connect('lib/databasewp3.db')
 c = conn.cursor()
 
 
@@ -23,7 +23,7 @@ def add_student():
     studentmail = request.form['studentmail']
     firstname = request.form['firstname']
     lastname = request.form['lastname']
-    conn = sqlite3.connect('databasewp3.db')
+    conn = sqlite3.connect('lib/databasewp3.db')
     c = conn.cursor()
     c.execute("INSERT INTO students (studentmail, firstname, lastname) VALUES (?, ?, ?)",
               (studentmail, firstname, lastname))
@@ -35,22 +35,20 @@ def add_student():
 
 @app.route('/get_students', methods=['GET'])
 def get_students():
-    conn = sqlite3.connect('databasewp3.db')
+    conn = sqlite3.connect('lib/databasewp3.db')
     c = conn.cursor()
     c.execute("SELECT * FROM students")
     students = c.fetchall()
     conn.close()
     return jsonify(students)
 
-@app.route('/delete_student', methods=['POST'])
-def delete_student():
-    student_id = request.form['student_id']
-    conn = sqlite3.connect('databasewp3.db')
-    c = conn.cursor()
-    c.execute('DELETE FROM students WHERE student_id = ?', (student_id,))
+@app.route('/delete_student/<int:studentid>', methods=['DELETE'])
+def delete_student(studentid):
+    conn = sqlite3.connect('lib/databasewp3.db')
+    cur = conn.cursor()
+    cur.execute('DELETE FROM students WHERE studentid = ?', (studentid,))
     conn.commit()
-    conn.close()
-    return 'OK'
+    return jsonify({'result': True})
 
 
 
@@ -61,7 +59,7 @@ def login():
      studentmail = request.form['studentmail']
 
     # connect to the database
-     conn = sqlite3.connect('databasewp3.db')
+     conn = sqlite3.connect('lib/databasewp3.db')
      c = conn.cursor()
 
     # check if the student email exists in the database
