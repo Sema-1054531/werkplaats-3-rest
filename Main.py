@@ -60,7 +60,7 @@ def login():
      studentmail = request.form['studentmail']
 
     # connect to the database
-     conn = sqlite3.connect('lib/databasewp3.db')
+     conn = sqlite3.connect('databasewp3.db')
      c = conn.cursor()
 
     # check if the student email exists in the database
