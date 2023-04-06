@@ -207,16 +207,10 @@ def plan_bijeenkomst():
         datemeeting = request.form['datemeeting']
         start_time = request.form['start_time']
         end_time = request.form['end_time']
-        classids = request.form.getlist('class[]')
-
-        # if 'class' in request.form:
-        #     classid = request.form['class']
-        # else:
-        #     classid = None
-        if 'subject' in request.form:
-            subjectid = request.form['subject']
+        if 'class' in request.form:
+            classid = request.form['class']
         else:
-            subjectid = None
+            classid = None
 
         # validate the input
         if not title:
@@ -232,25 +226,14 @@ def plan_bijeenkomst():
         datemeeting = datetime.strptime(request.form['datemeeting'], '%Y-%m-%d')
         if datemeeting.date() < datetime.now().date():
             return 'De datum ligt in het verleden!'
-        if not classids:
-            return 'Selecteer welke klassen je verwacht'
-        if not subjectid:
-            return 'Selecteer voor welke les je deze bijeenkomst maakt'
 
-        cursor = db.cursor()
-        cursor.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, subjectid) VALUES (?, ?, ?, ?, ?)",
-                   (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, subjectid))
-        meetingid = cursor.lastrowid
-
-        for classid in classids:
-            cursor.execute("INSERT INTO meeting_classes (meetingid, classid) VALUES (?, ?)", (meetingid, classid))
-
+        db.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, classid) VALUES (?, ?, ?, ?, ?)",
+                   (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, classid))
         db.commit()
 
         return 'bijeenkomst aangemaakt'
-    classes = db.execute('SELECT * from class ORDER BY classname').fetchall()
-    subjects = db.execute('SELECT * from subject').fetchall()
-    return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
+    classes = db.execute('SELECT * from class').fetchall()
+    return render_template("bijeenkomst_plannen.html", classes=classes)
 
 
 if __name__ == "__main__":
