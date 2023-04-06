@@ -24,6 +24,10 @@
                 <label for="lastname">Achternaam</label>
                 <input type="text" class="form-control" id="lastname" name="lastname" required>
             </div>
+            <div class="form-group">
+                <label for="classid">Studentklas</label>
+                <input type="text" class="form-control" id="classid" name="classid" required>
+            </div>
             <button type="submit" class="btn btn-primary">Toevoegen</button>
         </form>
         <hr>
@@ -33,6 +37,7 @@
                     <th>Voornaam</th>
                     <th>Achternaam</th>
                     <th>Studentmail</th>
+                    <th>Studentklas</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,18 +56,22 @@
                 var studentmail = $('#studentmail').val();
                 var firstname = $('#firstname').val();
                 var lastname = $('#lastname').val();
+                var classid = $('#classid').val();
                 $.ajax({
                     url: '/add_student',
                     type: 'POST',
                     data: {
                         studentmail: studentmail,
                         firstname: firstname,
-                        lastname: lastname
+                        lastname: lastname,
+                        classid: classid
                     },
                     success: function(response) {
                         $('#studentmail').val('');
                         $('#firstname').val('');
                         $('#lastname').val('');
+                        $('#classid').val('');
+
                         loadStudents();
                     }
                 });
@@ -91,6 +100,7 @@
                                       '<td>' + student[1] + '</td>' +
                                       '<td>' + student[2] + '</td>' +
                                       '<td>' + student[3] + '</td>' +
+                                      '<td>' + student[4] + '</td>' +
                                       '<td><button class="btn btn-danger btn-delete" data-studentid="' + student[0] + '">Verwijderen</button></td>' +
                                       '</tr>';
                             tbody.append(row);

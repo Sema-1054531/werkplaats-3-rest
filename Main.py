@@ -23,10 +23,11 @@ def add_student():
     studentmail = request.form['studentmail']
     firstname = request.form['firstname']
     lastname = request.form['lastname']
-    conn = sqlite3.connect('lib/databasewp3.db')
+    classid = request.form['classid']
+    conn = sqlite3.connect('databasewp3.db')
     c = conn.cursor()
-    c.execute("INSERT INTO students (studentmail, firstname, lastname) VALUES (?, ?, ?)",
-              (studentmail, firstname, lastname))
+    c.execute("INSERT INTO students (studentmail, firstname, lastname, classid) VALUES (?, ?, ?, ?)",
+              (studentmail, firstname, lastname, classid))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
@@ -35,7 +36,7 @@ def add_student():
 
 @app.route('/get_students', methods=['GET'])
 def get_students():
-    conn = sqlite3.connect('lib/databasewp3.db')
+    conn = sqlite3.connect('databasewp3.db')
     c = conn.cursor()
     c.execute("SELECT * FROM students")
     students = c.fetchall()
@@ -44,7 +45,7 @@ def get_students():
 
 @app.route('/delete_student/<int:studentid>', methods=['DELETE'])
 def delete_student(studentid):
-    conn = sqlite3.connect('lib/databasewp3.db')
+    conn = sqlite3.connect('databasewp3.db')
     cur = conn.cursor()
     cur.execute('DELETE FROM students WHERE studentid = ?', (studentid,))
     conn.commit()
