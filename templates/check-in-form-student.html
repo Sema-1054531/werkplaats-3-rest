@@ -8,11 +8,12 @@
 </head>
 <body>
 <div class="container">
-        <form method="post" class="row g-3">        <div class="col-12">
+        <form method="post" class="row g-3">
+        <div class="col-12">
             <h2>{{ title }}</h2>
         </div>
         <div class="col-12">
-            <input hidden type="text" class="form-control" name="meetingid">
+            <input type="text" class="form-control" name="meetingid">
         </div>
         <div class="col-12">
             <label for="studentid" class="form-label">Studentnummer</label>
@@ -24,10 +25,10 @@
         </div>
         <div class="col-md-6">
             <label for="lastname" class="form-label">Achternaam</label>
-            <input type="text" class="form-control" id="title" name="lastname">
+            <input type="text" class="form-control" id="lastname" name="lastname">
         </div>
         <div class="col-12">
-            <select class="form-select" name="progress" aria-label="Hoe sta je er voor">
+            <select class="form-select" id="progress" name="progress" aria-label="Hoe sta je er voor">
               <option disabled selected hidden>Hoe sta je er voor</option>
               <option value="Huiswerk is af">Huiswerk is af</option>
               <option value="Begonnen maar niet af">Begonnen maar niet af</option>
@@ -35,17 +36,16 @@
             </select>
         </div>
         <div class="col-md-6">
-            <label for="date" class="form-label">Datum</label>
-            <input type="date" class="form-control" id="date" name="checkin_date">
+            <label for="checkin_date" class="form-label">Datum</label>
+            <input type="date" class="form-control" id="checkin_date" name="checkin_date">
         </div>
         <div class="col-md-6">
-            <label for="time" class="form-label">Tijd</label>
-            <input type="time" class="form-control" id="time" name="checkin_time">
+            <label for="checkin_time" class="form-label">Tijd</label>
+            <input type="time" class="form-control" id="checkin_time" name="checkin_time">
         </div>
         <div class="col-12">
             <input type="submit" class="btn btn-primary" value="plan bijeenkomst">
         </div>
-
     </form>
 </div>
 <script>

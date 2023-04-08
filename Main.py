@@ -6,15 +6,26 @@ app = Flask(__name__)
 
 
 # Verbinding maken met de database
-conn = sqlite3.connect('lib/databasewp3.db')
+conn = sqlite3.connect('databasewp3.db')
 c = conn.cursor()
 
 
+
+
+
+from flask import Flask, render_template, request
+import sqlite3
+
+app = Flask(__name__)
 
 # Stel de route in voor het renderen van het sjabloon
 @app.route('/studentenoverzicht')
 def studentenoverzicht():
     return render_template('studentenoverzicht.html')
+
+@app.route('/studentprogress')
+def studentprogress():
+    return render_template('studentprogress.html')
 
 
 # Stel de route in voor het toevoegen van een student
@@ -32,6 +43,30 @@ def add_student():
     conn.close()
     return jsonify({'success': True})
 
+@app.route('/checkin', methods=['GET', 'POST'])
+def checkin():
+    title = "Check in"
+    if request.method == 'POST':
+        # Verwerk het formulier hier
+        meetingid = request.form['meetingid']
+        studentid = request.form['studentid']
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
+        progress = request.form['progress']
+        checkin_date = request.form['checkin_date']
+        checkin_time = request.form['checkin_time']
+        checkinid = request.form['checkinid']
+        subjectid = request.form['subjectid']
+
+        # Maak verbinding met de database en voer de gegevens in
+        conn = sqlite3.connect('databasewp3.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO checkin VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (meetingid, studentid, firstname, lastname, progress, checkin_date, checkin_time, checkinid, subjectid))
+        conn.commit()
+        conn.close()
+
+    return render_template('check-in-form-student.html', title=title)
+
 
 
 @app.route('/get_students', methods=['GET'])
@@ -42,6 +77,15 @@ def get_students():
     students = c.fetchall()
     conn.close()
     return jsonify(students)
+
+@app.route('/get_student', methods=['GET'])
+def get_student():
+    conn = sqlite3.connect('databasewp3.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM checkin")
+    checkin = c.fetchall()
+    conn.close()
+    return jsonify(checkin)
 
 @app.route('/delete_student/<int:studentid>', methods=['DELETE'])
 def delete_student(studentid):
@@ -164,39 +208,13 @@ def overzicht_docent():
 def close_checkin():
     return render_template('check_in.html', message="De check-in is gesloten")
 
-@app.route("/aanmelden" , methods=['GET', 'POST'])
-def check_in_student():
-    db = get_db()
+from flask import Flask, render_template, request
+import sqlite3
 
-    if request.method == 'POST':
-        studentid = request.form['studentid']
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
-        progress = request.form['progress']
-        checkin_date = request.form['checkin_date']
-        checkin_time = request.form['checkin_time']
+app = Flask(__name__)
 
-        #validate the input
-        if not studentid:
-            return 'Er ging iets mis met het ophalen van je studentnummer'
-        if not firstname:
-            return 'Vul eerst je naam in'
-        if not lastname:
-            return 'Vul eerst je achternaam in'
-        if not progress:
-            return 'Vergeet niet aan te geven hoe je er voor staat'
-        if not checkin_date:
-            return 'Er ging iets mis met het ophalen van de datum van vandaag'
-        if not checkin_time:
-            return 'Er ging iets mis met het ophalen van de tijd'
 
-        db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time) VALUES (?, ?, ?, ?, ?, ?)",
-                   (studentid, firstname, lastname, progress, checkin_date, checkin_time))
-        db.commit()
 
-        return "Je bent ingescheckt voor vandaag!"
-    meeting = db.execute('SELECT * FROM meeting').fetchall()
-    return render_template("check-in-form-student.html", meeting=meeting)
 
 @app.route('/plan_bijeenkomst', methods=['GET', 'POST'])
 def plan_bijeenkomst():
