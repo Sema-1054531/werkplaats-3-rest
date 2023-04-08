@@ -31,6 +31,12 @@
             <button type="submit" class="btn btn-primary">Toevoegen</button>
         </form>
         <hr>
+        <div class="form-group">
+            <label for="filter-classid">Filter op studentklas:</label>
+            <select id="filter-classid" class="form-control">
+                <option value="">Alle klassen</option>
+            </select>
+        </div>
         <table id="student-table" class="table table-striped">
             <thead>
                 <tr>
@@ -48,6 +54,25 @@
     <script>
         $(function() {
             loadStudents();
+
+             // Laad studentklassen voor het filter
+            $.ajax({
+                url: '/get_classes',
+                type: 'GET',
+                success: function(response) {
+                    var select = $('#filter-classid');
+                    for (var i = 0; i < response.length; i++) {
+                        var classid = response[i];
+                        var option = '<option value="' + classid + '">' + classid + '</option>';
+                        select.append(option);
+                    }
+
+                    // Update de lijst wanneer het filter verandert
+                    select.change(function() {
+                        loadStudents();
+                    });
+                }
+            });
 
 
             $('#add-student-form').submit(function(event) {
@@ -86,10 +111,13 @@
                 });
             });
 
-            function loadStudents() {
+            function loadStudents(filterClass) {
                 $.ajax({
                     url: '/get_students',
                     type: 'GET',
+                    data: {
+                        classid: filterClass // add classid to filter parameter
+                    },
                     success: function(response) {
                         var tbody = $('#student-table tbody');
                         tbody.empty();

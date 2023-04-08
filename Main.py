@@ -87,6 +87,16 @@ def get_student():
     conn.close()
     return jsonify(checkin)
 
+@app.route('/get_classes')
+def get_classes():
+    conn = sqlite3.connect('databasewp3.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT clasname FROM class")
+    rows = cursor.fetchall()
+    classes = [row[0] for row in rows]
+    conn.close()
+    return jsonify(classes)
+
 @app.route('/delete_student/<int:studentid>', methods=['DELETE'])
 def delete_student(studentid):
     conn = sqlite3.connect('databasewp3.db')
@@ -159,7 +169,7 @@ import sqlite3
 import os
 
 app = Flask(__name__)
-app.config['DATABASE'] = os.path.join(os.getcwd(), 'lib/databasewp3.db')
+app.config['DATABASE'] = os.path.join(os.getcwd(), 'databasewp3.db')
 
 LISTEN_ALL = "0.0.0.0"
 FLASK_IP = LISTEN_ALL
