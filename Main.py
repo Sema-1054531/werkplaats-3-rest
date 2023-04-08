@@ -60,11 +60,14 @@ def login():
         studentid = request.form['studentid']
         cursor = db.cursor()
         # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
-        cursor.execute("SELECT studentid FROM students WHERE studentid = ?", (studentid,))
+        cursor.execute("SELECT studentid, classid FROM students WHERE studentid = ?", (studentid,))
         student = cursor.fetchone()
 
         if student is not None:
+            studentid = student[0]
+            classid = student[1]
             session['studentid'] = studentid
+            session['classid'] = classid
             return redirect('/roosteroverzicht_student')
         else:
             error = "Ongeldige inloggegevens. Probeer het opnieuw."
@@ -203,7 +206,7 @@ def plan_bijeenkomst():
     subjects = db.execute('SELECT * from subject').fetchall()
     return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
 
-@app.route("/aanmelden" , methods=['GET', 'POST'])
+@app.route("/check-in" , methods=['GET', 'POST'])
 def check_in_student():
     db = get_db()
 
@@ -237,121 +240,80 @@ def check_in_student():
     meeting = db.execute('SELECT * FROM meeting').fetchall()
     return render_template("check-in-form-student.html", meeting=meeting)
 
+
+# API endpoint to get meetings
+class LessonsResource(Resource):
+    def get(self):
+        # connecting with database and getting classid from current student
+        conn = sqlite3.connect(app.config['DATABASE'])
+        cursor = conn.cursor()
+
+        classid = session['classid']
+
+        # Query to get meeting from students own class
+        cursor.execute("SELECT * FROM meeting "
+                       "INNER JOIN meeting_classes mc ON meeting.meetingid = mc.meetingid "
+                       "WHERE mc.classid = ?", (classid,))
+        result = cursor.fetchall()
+
+        # Formatting meeting data
+        lessons = []
+        for row in result:
+            lesson = {
+                'id': row[0],
+                'title': row[1],
+                'datemeeting': row[2],
+                'start_time': row[3],
+                'end_time': row[4],
+                'teacherid': row[5],
+                'subjectid': row[6]
+            }
+
+            # Query to get the name of teacher
+            cursor.execute("SELECT firstname, lastname FROM teacher WHERE teacherid = ?", (row[5],))
+            teacher = cursor.fetchone()
+
+            # Add name of teacher to lesobject
+            if teacher is not None:
+                lesson['teachername'] = teacher[0] + ' ' + teacher[1]
+            else:
+                lesson['teachername'] = 'Onbekend'
+
+            # Query to get name of subject
+            cursor.execute("SELECT subjectname FROM subject WHERE subjectid = ?", (row[6],))
+            subject = cursor.fetchone()
+
+            # Add name of subject to lesobject
+            if subject is not None:
+                lesson['subjectname'] = subject[0]
+            else:
+                lesson['subjectname'] = 'Onbekend'
+
+            lessons.append(lesson)
+
+        # close connection with database
+        cursor.close()
+        conn.close()
+
+        return jsonify({'lessons': lessons})
+
+api.add_resource(LessonsResource, '/api/lessons')
+
 @app.route('/roosteroverzicht_student')
-def student_schedule():
-    return render_template('roosteroverzicht_student.html')
+def rooster_student():
+    # check if student is logged in
+    if 'studentid' in session:
+        studentid = session['studentid']
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("SELECT firstname, lastname FROM students WHERE studentid = ?", (studentid,))
+        student = cursor.fetchone()
+        if student is not None:
+            firstname, lastname = student
+            name = f"{firstname} {lastname}"
+            return render_template('roosteroverzicht_student.html', name=name)
+    return redirect('/login')
 
-@app.route('/get_students', methods=['GET'])
-def get_students():
-    conn = sqlite3.connect('databasewp3.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM students")
-    students = c.fetchall()
-    conn.close()
-    return jsonify(students)
-
-@app.route('/get_student', methods=['GET'])
-def get_student():
-    conn = sqlite3.connect('databasewp3.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM meeting")
-    checkin = c.fetchall()
-    conn.close()
-    return jsonify(checkin)
-
-
-# class Student(Resource):
-#     def get(self, studentid):
-#         db = get_db()
-#         db.execute("SELECT * FROM students WHERE studentid=?", (studentid,))
-#         result = db.fetchone()
-#         if result:
-#             return {'studentid': result[0], 'firstname': result[1], 'lastname': result[2], 'studentmail': result[3], 'classid': result[4]}
-#         else:
-#             return {'error': 'Student not found'}, 404
-#
-#
-# class Lesson(Resource):
-#     def get(self, studentid):
-#         db = get_db()
-#         db.execute("SELECT meeting.*, subject.subjectname FROM meeting_classes JOIN meeting ON meeting_classes.meetingid = meeting.meetingid JOIN subject ON meeting.subjectid = subject.subjectid JOIN students ON students.classid = meeting_classes.classid WHERE students.studentid=?", (studentid,))
-#         result = db.fetchall()
-#         if result:
-#             lesson_list = []
-#             for lesson in result:
-#                 lesson_dict = {'meetingid': lesson[0], 'title': lesson[1], 'datemeeting': lesson[2], 'start_time': lesson[3], 'end_time': lesson[4], 'classid': lesson[5], 'teacherid': lesson[6], 'subjectname': lesson[7]}
-#                 lesson_list.append(lesson_dict)
-#             return {'lessons': lesson_list}
-#         else:
-#             return {'error': 'No lessons found for student'}, 404
-#
-#
-# class Absence(Resource):
-#     def post(self):
-#         parser = reqparse.RequestParser()
-#         parser.add_argument('meetingid', type=int, help='Lesson ID is required', required=True)
-#         parser.add_argument('studentid', type=int, help='Student ID is required', required=True)
-#         parser.add_argument('reason_for_absence', type=str, help='Reason for absence is required', required=True)
-#         args = parser.parse_args()
-#
-#         db = get_db()
-#         db.execute("INSERT INTO absence (meetinid, studentid, reason_for_absence) VALUES (?, ?, ?)",
-#                   (args['meetingid'], args['studentid'], args['reason_for_absence']))
-#         conn.commit()
-#
-#         return {'success': 'Absence reported'}, 201
-#
-#
-# api.add_resource(Student, '/api/student/<int:studentid>')
-# api.add_resource(Lesson, '/api/lesson/<int:studentid>')
-# api.add_resource(Absence, '/api/absence')
-#
-#
-# @app.route('/api/student/<int:studentid>/bijeenkomst', methods=['GET'])
-# def get_student_meetings(studentid):
-#     # check if student is logged in
-#     if 'studentid' in session and session['studentid'] == studentid:
-#         db = get_db()
-#         cursor = db.cursor()
-#         cursor.execute("""
-#             SELECT meeting.title, meeting.datemeeting, meeting.start_time, meeting.end_time, teacher.firstname, subject.subjectname
-#             FROM meeting
-#             JOIN meeting_classes ON meeting.meetingid = meeting_classes.meetingid
-#             JOIN students ON meeting_classes.classid = students.classid
-#             JOIN teacher ON meeting.teacherid = teacher.teacherid
-#             JOIN subject ON meeting.subjectid = subject.subjectid
-#             WHERE students.studentid = ?
-#             ORDER BY meeting.datemeeting, meeting.start_time
-#         """, (studentid,))
-#         rooster = cursor.fetchall()
-#         rooster_dict = []
-#         for row in rooster:
-#             rooster_dict.append({
-#                 'title': row[0],
-#                 'datemeeting': row[1],
-#                 'start_time': row[2],
-#                 'end_time': row[3],
-#                 'teacher': row[4],
-#                 'subject': row[5]
-#             })
-#         return jsonify(rooster_dict)
-#     else:
-#         return jsonify({'message': 'Unauthorized access.'}), 401
-#
-# @app.route('/roosteroverzicht_student')
-# def rooster_student():
-#     # check if student is logged in
-#     if 'studentid' in session:
-#         studentid = session['studentid']
-#         db = get_db()
-#         cursor = db.cursor()
-#         cursor.execute("SELECT firstname, lastname FROM students WHERE studentid = ?", (studentid,))
-#         student = cursor.fetchone()
-#         if student is not None:
-#             firstname, lastname = student
-#             name = f"{firstname} {lastname}"
-#             return render_template('roosteroverzicht_student.html', name=name)
-#     return redirect('/login')
 
 
 if __name__ == "__main__":
