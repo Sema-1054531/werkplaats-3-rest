@@ -9,6 +9,7 @@
 	<div class="container">
 		<h1 class="mt-4 mb-4">Roosteroverzicht</h1>
 		<button class="btn btn-primary mb-4" onclick="haalRoosterOp()">Rooster ophalen</button>
+        <button class="btn btn-primary mb-4" onclick="window.location.href='{{ url_for('plan_bijeenkomst') }}'">Nieuwe meeting</button>
 		<table class="table table-striped" id="rooster">
 			<thead>
 				<tr>

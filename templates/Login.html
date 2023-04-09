@@ -2,23 +2,14 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../static/style.css">
-    <title>Hogeschool Rotterdam - Login</title>
-    <script>
-        // JavaScript code goes here
-        var form = document.querySelector("form");
-        form.addEventListener("submit", function(event) {
-            event.preventDefault();
-            var studentmail = document.getElementById("studentmail").value;
-            alert("You entered: " + studentmail);
-        });
-    </script>
-</head>
+    <link rel="stylesheet" type="text/css" href="../static/style-inlog.css">
+    <title>Hogeschool Rotterdam - Login</title></head>
 <body>
-    <form method="post">
-        <h1>Hogeschool Rotterdam - Login</h1>
-        <label for="studentmail">Studentmail</label>
-        <input type="text" name="studentmail" id="studentmail" placeholder="Vul uw student email in" required>
-        <input type="submit" value="Inloggen">
-    </form>
+<form method="post">
+    <h1>Hogeschool Rotterdam - Login</h1>
+    <label for="studentmail">e-mail:</label>
+    <input type="text" name="studentmail"  placeholder="Vul uw student email in" required>
+    <input type="submit" value="Inloggen">
+</form>
 </body>
 </html>
