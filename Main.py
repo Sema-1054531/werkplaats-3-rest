@@ -97,11 +97,17 @@ def login_teachers():
         teacherid = request.form['teacherid']
         cursor = db.cursor()
         # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
-        cursor.execute("SELECT teacherid FROM teacher WHERE teacherid = ?", (teacherid,))
+        cursor.execute("SELECT teacherid, firstname, lastname FROM teacher WHERE teacherid = ?", (teacherid,))
         teacher = cursor.fetchone()
 
         if teacher is not None:
+            teacherid = teacher[0]
+            firstname = teacher[1]
+            lastname = teacher[2]
+
             session['teacherid'] = teacherid
+            session['firstname'] = firstname
+            session['lastname'] = lastname
             return redirect('/overzicht_docent')
         else:
             error = "Ongeldige inloggegevens. Probeer het opnieuw."
@@ -113,6 +119,7 @@ def login_teachers():
 def logout():
     session.pop('studentmail', None)
     return redirect('/login')
+
 
 
 # Route voor dashboardpagina
@@ -142,6 +149,67 @@ def save_data():
     with open('static/rooster.json', 'w') as f:
         json.dump(data, f)
     return 'Data succesvol opgeslagen in rooster.json'
+
+# Stel de route in voor het renderen van het sjabloon
+@app.route('/studentenoverzicht')
+def studentenoverzicht():
+    return render_template('studentenoverzicht.html')
+
+@app.route('/studentprogress')
+def studentprogress():
+    return render_template('studentprogress.html')
+
+
+# Stel de route in voor het toevoegen van een student
+@app.route('/add_student', methods=['POST'])
+def add_student():
+    studentmail = request.form['studentmail']
+    firstname = request.form['firstname']
+    lastname = request.form['lastname']
+    classid = request.form['classid']
+    conn = sqlite3.connect('databasewp3.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO students (studentmail, firstname, lastname, classid) VALUES (?, ?, ?, ?)",
+              (studentmail, firstname, lastname, classid))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/get_students', methods=['GET'])
+def get_students():
+    conn = sqlite3.connect('databasewp3.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM students")
+    students = c.fetchall()
+    conn.close()
+    return jsonify(students)
+
+@app.route('/get_student', methods=['GET'])
+def get_student():
+    conn = sqlite3.connect('databasewp3.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM checkin")
+    checkin = c.fetchall()
+    conn.close()
+    return jsonify(checkin)
+
+@app.route('/get_classes')
+def get_classes():
+    conn = sqlite3.connect('databasewp3.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT classname FROM class")
+    rows = cursor.fetchall()
+    classes = [row[0] for row in rows]
+    conn.close()
+    return jsonify(classes)
+
+@app.route('/delete_student/<int:studentid>', methods=['DELETE'])
+def delete_student(studentid):
+    conn = sqlite3.connect('databasewp3.db')
+    cur = conn.cursor()
+    cur.execute('DELETE FROM students WHERE studentid = ?', (studentid,))
+    conn.commit()
+    return jsonify({'result': True})
 
 class LessonsResource(Resource):
     def get(self):
@@ -280,6 +348,7 @@ def plan_bijeenkomst():
         start_time = request.form['start_time']
         end_time = request.form['end_time']
         classids = request.form.getlist('class[]')
+        teacherid = request.form['teacherid']
 
         # if 'class' in request.form:
         #     classid = request.form['class']
@@ -310,8 +379,8 @@ def plan_bijeenkomst():
             return 'Selecteer voor welke les je deze bijeenkomst maakt'
 
         cursor = db.cursor()
-        cursor.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, subjectid) VALUES (?, ?, ?, ?, ?)",
-                   (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, subjectid))
+        cursor.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, subjectid, teacherid) VALUES (?, ?, ?, ?, ?, ?)",
+                   (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, subjectid, teacherid))
         meetingid = cursor.lastrowid
 
         for classid in classids:
@@ -319,7 +388,7 @@ def plan_bijeenkomst():
 
         db.commit()
 
-        return 'bijeenkomst aangemaakt'
+        return render_template("make_meeting_complete.html")
     classes = db.execute('SELECT * from class ORDER BY classname').fetchall()
     subjects = db.execute('SELECT * from subject').fetchall()
     return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
@@ -356,7 +425,7 @@ def check_in_student():
                    (studentid, firstname, lastname, progress, checkin_date, checkin_time, meetingid))
         db.commit()
 
-        return "Je bent ingescheckt voor vandaag!"
+        return render_template("check-in-complete.html")
     meetingid = request.args.get('meetingid') or request.form.get('meetingid')
     meeting = db.execute('SELECT * FROM meeting').fetchall()
     return render_template("check-in-form-student.html", meeting=meeting, meetingid=meetingid)
@@ -434,7 +503,6 @@ def rooster_student():
             name = f"{firstname} {lastname}"
             return render_template('roosteroverzicht_student.html', name=name)
     return redirect('/login')
-
 
 
 if __name__ == "__main__":

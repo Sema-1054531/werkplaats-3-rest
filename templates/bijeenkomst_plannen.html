@@ -10,14 +10,14 @@
 <body>
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('overzicht_docent') }}">bijeenkomst plannen</a>
+        <a class="navbar-brand" href="{{ url_for('overzicht_docent') }}">{{ session['firstname'] }} {{ session['lastname'] }}</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('plan_bijeenkomst') }}">Bijeenkomst plannen</a>
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('overzicht_docent') }}">Bijeenkomsten</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('logout') }}">Log uit</a>
@@ -28,6 +28,9 @@
 </nav>
 <div class="container">
     <form action="{{ url_for('plan_bijeenkomst') }}" method="post" class="row g-3">
+        <div class="col-12">
+            <input hidden type="text" class="form-control" name="teacherid" value="{{ session['teacherid'] }}">
+        </div>
         <div class="col-md-8">
             <label for="title" class="form-label">Omschrijving van bijeenkomst</label>
             <input type="text" class="form-control" id="title" name="title">
