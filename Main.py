@@ -291,7 +291,7 @@ def check_in_student():
                    (studentid, firstname, lastname, progress, checkin_date, checkin_time, meetingid))
         db.commit()
 
-        return "Je bent ingescheckt voor vandaag!"
+        return render_template("check-in-complete.html")
     meetingid = request.args.get('meetingid') or request.form.get('meetingid')
     meeting = db.execute('SELECT * FROM meeting').fetchall()
     return render_template("check-in-form-student.html", meeting=meeting, meetingid=meetingid)
