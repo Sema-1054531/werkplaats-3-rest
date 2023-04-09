@@ -357,7 +357,7 @@ def plan_bijeenkomst():
             subjectid = request.form['subject']
 
         else:
-            classid = None
+            subjectid = None
 
         # validate the input
         if not title:
@@ -388,8 +388,8 @@ def plan_bijeenkomst():
             cursor.execute("INSERT INTO meeting_classes (meetingid, classid) VALUES (?, ?)", (meetingid, classid))
 
 
-        db.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, classid) VALUES (?, ?, ?, ?, ?)",
-                   (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, classid))
+        # db.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, classid) VALUES (?, ?, ?, ?, ?)",
+        #            (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, classid))
         db.commit()
 
         return render_template("make_meeting_complete.html")
@@ -511,4 +511,3 @@ def rooster_student():
 
 if __name__ == "__main__":
     app.run(host=FLASK_IP, port=FLASK_PORT, debug=FLASK_DEBUG)
-
