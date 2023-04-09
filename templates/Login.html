@@ -6,7 +6,8 @@
 <body>
 <form method="post">
     <h1>Hogeschool Rotterdam - Login</h1>
-    <label for="studentmail">e-mail:</label>
-    <input type="text" name="studentmail"  placeholder="Vul uw e-mail in" required>
+    <label for="studentmail">Studenten mail:</label>
+    <input type="text" name="studentmail"  placeholder="Vul je studenten mail in" required>
+    Ben je een docent? Log dan <a href="{{ url_for('login_teachers') }}">hier</a> in
     <input type="submit" value="Inloggen">
 </form>
