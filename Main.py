@@ -167,7 +167,7 @@ def add_student():
 
 @app.route('/get_students', methods=['GET'])
 def get_students():
-    conn = sqlite3.connect('databasewp3.db')
+    conn = sqlite3.connect('lib/databasewp3.db')
     c = conn.cursor()
     c.execute("SELECT * FROM students")
     students = c.fetchall()
@@ -176,7 +176,7 @@ def get_students():
 
 @app.route('/get_student', methods=['GET'])
 def get_student():
-    conn = sqlite3.connect('databasewp3.db')
+    conn = sqlite3.connect('lib/databasewp3.db')
     c = conn.cursor()
     c.execute("SELECT * FROM checkin")
     checkin = c.fetchall()
@@ -185,7 +185,7 @@ def get_student():
 
 @app.route('/get_classes')
 def get_classes():
-    conn = sqlite3.connect('databasewp3.db')
+    conn = sqlite3.connect('lib/databasewp3.db')
     cursor = conn.cursor()
     cursor.execute("SELECT DISTINCT classname FROM class")
     rows = cursor.fetchall()
@@ -195,7 +195,7 @@ def get_classes():
 
 @app.route('/delete_student/<int:studentid>', methods=['DELETE'])
 def delete_student(studentid):
-    conn = sqlite3.connect('databasewp3.db')
+    conn = sqlite3.connect('lib/databasewp3.db')
     cur = conn.cursor()
     cur.execute('DELETE FROM students WHERE studentid = ?', (studentid,))
     conn.commit()
