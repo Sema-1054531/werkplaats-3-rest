@@ -59,14 +59,14 @@ def get_greeting():
 def login():
     db = get_db()
 
-    if 'studentid' in session:
+    if 'studentmail' in session:
         return redirect('/roosteroverzicht_student')
 
     if request.method == 'POST':
-        studentid = request.form['studentid']
+        studentmail = request.form['studentmail']
         cursor = db.cursor()
         # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
-        cursor.execute("SELECT studentid, classid, firstname, lastname FROM students WHERE studentid = ?", (studentid,))
+        cursor.execute("SELECT studentid, classid, firstname, lastname, studentmail FROM students WHERE studentmail = ?", (studentmail,))
         student = cursor.fetchone()
 
         if student is not None:
@@ -74,11 +74,13 @@ def login():
             classid = student[1]
             firstname = student[2]
             lastname = student[3]
+            studentmail = student[4]
 
             session['studentid'] = studentid
             session['classid'] = classid
             session['firstname'] = firstname
             session['lastname'] = lastname
+            session['studentmail'] = studentmail
 
             return redirect('/roosteroverzicht_student')
         else:
@@ -218,52 +220,6 @@ def plan_bijeenkomst():
     subjects = db.execute('SELECT * from subject').fetchall()
     return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
 
-# @app.route('/check-in', methods=['GET', 'POST'])
-# def checkin(meetingid):
-#     db = get_db()
-#
-#     # Get meeting object from the database based on meeting_id
-#     meeting = Meeting.query.get(meetingid)
-#
-#     # Check if meeting exists
-#     if not meeting:
-#         return 'Meeting not found', 404
-#
-#     # Get student information from the session, assuming it's stored as session variables
-#     student_id = session['studentid']
-#     firstname = session['firstname']
-#     lastname = session['lastname']
-#
-#     # Handle form submission
-#     if request.method == 'POST':
-#         studentid = request.form['studentid']
-#         firstname = request.form['firstname']
-#         lastname = request.form['lastname']
-#         progress = request.form['progress']
-#         checkin_date = request.form['checkin_date']
-#         checkin_time = request.form['checkin_time']
-#
-#         #validate the input
-#         if not studentid:
-#             return 'Er ging iets mis met het ophalen van je studentnummer'
-#         if not firstname:
-#             return 'Vul eerst je naam in'
-#         if not lastname:
-#             return 'Vul eerst je achternaam in'
-#         if not progress:
-#             return 'Vergeet niet aan te geven hoe je er voor staat'
-#         if not checkin_date:
-#             return 'Er ging iets mis met het ophalen van de datum van vandaag'
-#         if not checkin_time:
-#             return 'Er ging iets mis met het ophalen van de tijd'
-#
-#         db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time) VALUES (?, ?, ?, ?, ?, ?)",
-#                    (studentid, firstname, lastname, progress, checkin_date, checkin_time))
-#         db.commit()
-#
-#         return "Je bent ingescheckt voor vandaag!"
-#     return render_template('check-in-form-student.html', meeting=meeting, student_id=student_id, firstname=firstname,
-#                            lastname=lastname)
 
 @app.route("/check-in" , methods=['GET', 'POST'])
 def check_in_student():
@@ -363,11 +319,11 @@ api.add_resource(LessonsResource, '/api/lessons')
 @app.route('/roosteroverzicht_student')
 def rooster_student():
     # check if student is logged in
-    if 'studentid' in session:
-        studentid = session['studentid']
+    if 'studentmail' in session:
+        studentmail = session['studentmail']
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("SELECT firstname, lastname FROM students WHERE studentid = ?", (studentid,))
+        cursor.execute("SELECT firstname, lastname FROM students WHERE studentmail = ?", (studentmail,))
         student = cursor.fetchone()
         if student is not None:
             firstname, lastname = student
