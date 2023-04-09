@@ -61,15 +61,16 @@
                 type: 'GET',
                 success: function(response) {
                     var select = $('#filter-classid');
+                    select.append('<option value="">Alle klassen</option>');
                     for (var i = 0; i < response.length; i++) {
                         var classid = response[i];
                         var option = '<option value="' + classid + '">' + classid + '</option>';
                         select.append(option);
                     }
-
                     // Update de lijst wanneer het filter verandert
                     select.change(function() {
-                        loadStudents();
+                        var filterClass = $('#filter-classid').val();
+                        loadStudents(filterClass);
                     });
                 }
             });

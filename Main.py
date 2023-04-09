@@ -91,7 +91,7 @@ def get_student():
 def get_classes():
     conn = sqlite3.connect('databasewp3.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT clasname FROM class")
+    cursor.execute("SELECT DISTINCT classname FROM class")
     rows = cursor.fetchall()
     classes = [row[0] for row in rows]
     conn.close()
