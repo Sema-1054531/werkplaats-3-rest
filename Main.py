@@ -111,7 +111,7 @@ def login_teachers():
 
 @app.route('/loguit')
 def logout():
-    session.pop('studentid', None)
+    session.pop('studentmail', None)
     return redirect('/login')
 
 
@@ -143,6 +143,112 @@ def save_data():
         json.dump(data, f)
     return 'Data succesvol opgeslagen in rooster.json'
 
+class LessonsResource(Resource):
+    def get(self):
+        # Check if user is a student or a teacher
+        if 'studentmail' in session:
+            # If user is a student, get the classid from session
+            conn = sqlite3.connect(app.config['DATABASE'])
+            cursor = conn.cursor()
+            classid = session['classid']
+
+            # Query to get meeting from students own class
+            cursor.execute("SELECT * FROM meeting "
+                           "INNER JOIN meeting_classes mc ON meeting.meetingid = mc.meetingid "
+                           "WHERE mc.classid = ?", (classid,))
+            result = cursor.fetchall()
+
+            # Formatting meeting data
+            lessons = []
+            for row in result:
+                lesson = {
+                    'id': row[0],
+                    'title': row[1],
+                    'datemeeting': row[2],
+                    'start_time': row[3],
+                    'end_time': row[4],
+                    'teacherid': row[5],
+                    'subjectid': row[6]
+                }
+
+                # Query to get the name of teacher
+                cursor.execute("SELECT firstname, lastname FROM teacher WHERE teacherid = ?", (row[5],))
+                teacher = cursor.fetchone()
+
+                # Add name of teacher to lesobject
+                if teacher is not None:
+                    lesson['teachername'] = teacher[0] + ' ' + teacher[1]
+                else:
+                    lesson['teachername'] = 'Onbekend'
+
+                # Query to get name of subject
+                cursor.execute("SELECT subjectname FROM subject WHERE subjectid = ?", (row[6],))
+                subject = cursor.fetchone()
+
+                # Add name of subject to lesobject
+                if subject is not None:
+                    lesson['subjectname'] = subject[0]
+                else:
+                    lesson['subjectname'] = 'Onbekend'
+
+                lessons.append(lesson)
+
+        elif 'teacherid' in session:
+            # If user is a teacher, get the teacherid from session
+            conn = sqlite3.connect(app.config['DATABASE'])
+            cursor = conn.cursor()
+            teacherid = session['teacherid']
+            cursor.execute("SELECT * FROM meeting "
+                           "WHERE teacherid = ?", (teacherid,))
+            result = cursor.fetchall()
+
+            # Formatting meeting data
+            lessons = []
+            for row in result:
+                lesson = {
+                    'id': row[0],
+                    'title': row[1],
+                    'datemeeting': row[2],
+                    'start_time': row[3],
+                    'end_time': row[4],
+                    'teacherid': row[5],
+                    'subjectid': row[6]
+                }
+
+                # Query to get the name of teacher
+                cursor.execute("SELECT firstname, lastname FROM teacher WHERE teacherid = ?", (row[5],))
+                teacher = cursor.fetchone()
+
+                # Add name of teacher to lesobject
+                if teacher is not None:
+                    lesson['teachername'] = teacher[0] + ' ' + teacher[1]
+                else:
+                    lesson['teachername'] = 'Onbekend'
+
+                # Query to get name of subject
+                cursor.execute("SELECT subjectname FROM subject WHERE subjectid = ?", (row[6],))
+                subject = cursor.fetchone()
+
+                # Add name of subject to lesobject
+                if subject is not None:
+                    lesson['subjectname'] = subject[0]
+                else:
+                    lesson['subjectname'] = 'Onbekend'
+
+                lessons.append(lesson)
+
+        else:
+            # If user is not logged in or is not a student or teacher, return an error
+            return jsonify({'error': 'Unauthorized access'}), 401
+
+        # close connection with database
+        cursor.close()
+        conn.close()
+
+        return jsonify({'lessons': lessons})
+
+api.add_resource(LessonsResource, '/api/lessons')
+
 
 @app.route("/overzicht_docent")
 def overzicht_docent():
@@ -157,8 +263,6 @@ def overzicht_docent():
             name = f"{firstname} {lastname}"
             return render_template('overzicht_docent.html', name=name)
     return redirect('/login/docent')
-
-    return render_template("overzicht_docent.html")
 
 
 @app.route("/close_checkin", methods=['POST'])
@@ -259,62 +363,62 @@ def check_in_student():
 
 
 # API endpoint to get meetings
-class LessonsResource(Resource):
-    def get(self):
-        # connecting with database and getting classid from current student
-        conn = sqlite3.connect(app.config['DATABASE'])
-        cursor = conn.cursor()
-
-        classid = session['classid']
-
-        # Query to get meeting from students own class
-        cursor.execute("SELECT * FROM meeting "
-                       "INNER JOIN meeting_classes mc ON meeting.meetingid = mc.meetingid "
-                       "WHERE mc.classid = ?", (classid,))
-        result = cursor.fetchall()
-
-        # Formatting meeting data
-        lessons = []
-        for row in result:
-            lesson = {
-                'id': row[0],
-                'title': row[1],
-                'datemeeting': row[2],
-                'start_time': row[3],
-                'end_time': row[4],
-                'teacherid': row[5],
-                'subjectid': row[6]
-            }
-
-            # Query to get the name of teacher
-            cursor.execute("SELECT firstname, lastname FROM teacher WHERE teacherid = ?", (row[5],))
-            teacher = cursor.fetchone()
-
-            # Add name of teacher to lesobject
-            if teacher is not None:
-                lesson['teachername'] = teacher[0] + ' ' + teacher[1]
-            else:
-                lesson['teachername'] = 'Onbekend'
-
-            # Query to get name of subject
-            cursor.execute("SELECT subjectname FROM subject WHERE subjectid = ?", (row[6],))
-            subject = cursor.fetchone()
-
-            # Add name of subject to lesobject
-            if subject is not None:
-                lesson['subjectname'] = subject[0]
-            else:
-                lesson['subjectname'] = 'Onbekend'
-
-            lessons.append(lesson)
-
-        # close connection with database
-        cursor.close()
-        conn.close()
-
-        return jsonify({'lessons': lessons})
-
-api.add_resource(LessonsResource, '/api/lessons')
+# class LessonsResource(Resource):
+#     def get(self):
+#         # connecting with database and getting classid from current student
+#         conn = sqlite3.connect(app.config['DATABASE'])
+#         cursor = conn.cursor()
+#
+#         classid = session['classid']
+#
+#         # Query to get meeting from students own class
+#         cursor.execute("SELECT * FROM meeting "
+#                        "INNER JOIN meeting_classes mc ON meeting.meetingid = mc.meetingid "
+#                        "WHERE mc.classid = ?", (classid,))
+#         result = cursor.fetchall()
+#
+#         # Formatting meeting data
+#         lessons = []
+#         for row in result:
+#             lesson = {
+#                 'id': row[0],
+#                 'title': row[1],
+#                 'datemeeting': row[2],
+#                 'start_time': row[3],
+#                 'end_time': row[4],
+#                 'teacherid': row[5],
+#                 'subjectid': row[6]
+#             }
+#
+#             # Query to get the name of teacher
+#             cursor.execute("SELECT firstname, lastname FROM teacher WHERE teacherid = ?", (row[5],))
+#             teacher = cursor.fetchone()
+#
+#             # Add name of teacher to lesobject
+#             if teacher is not None:
+#                 lesson['teachername'] = teacher[0] + ' ' + teacher[1]
+#             else:
+#                 lesson['teachername'] = 'Onbekend'
+#
+#             # Query to get name of subject
+#             cursor.execute("SELECT subjectname FROM subject WHERE subjectid = ?", (row[6],))
+#             subject = cursor.fetchone()
+#
+#             # Add name of subject to lesobject
+#             if subject is not None:
+#                 lesson['subjectname'] = subject[0]
+#             else:
+#                 lesson['subjectname'] = 'Onbekend'
+#
+#             lessons.append(lesson)
+#
+#         # close connection with database
+#         cursor.close()
+#         conn.close()
+#
+#         return jsonify({'lessons': lessons})
+#
+# api.add_resource(LessonsResource, '/api/lessons')
 
 @app.route('/roosteroverzicht_student')
 def rooster_student():
