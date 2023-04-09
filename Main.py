@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, jsonify, g, redirect, session, json
 from datetime import datetime, timedelta
-
 from flask_restful import Resource, Api, reqparse, fields, marshal_with
 
 import sqlite3
@@ -132,16 +131,13 @@ def dashboard():
     else:
         return redirect('/')
 
-
 @app.route('/rooster')
 def show_rooster():
     return render_template('rooster.html')
 
-
 @app.route('/roosteroverzicht')
 def show_roosteroverzicht():
     return render_template('roosteroverzicht.html')
-
 
 @app.route('/save_data', methods=['POST'])
 def save_data():
@@ -210,6 +206,7 @@ def delete_student(studentid):
     cur.execute('DELETE FROM students WHERE studentid = ?', (studentid,))
     conn.commit()
     return jsonify({'result': True})
+
 
 class LessonsResource(Resource):
     def get(self):
@@ -318,6 +315,7 @@ class LessonsResource(Resource):
 api.add_resource(LessonsResource, '/api/lessons')
 
 
+
 @app.route("/overzicht_docent")
 def overzicht_docent():
     if 'teacherid' in session:
@@ -347,6 +345,7 @@ def plan_bijeenkomst():
         datemeeting = request.form['datemeeting']
         start_time = request.form['start_time']
         end_time = request.form['end_time']
+
         classids = request.form.getlist('class[]')
         teacherid = request.form['teacherid']
 
@@ -356,8 +355,9 @@ def plan_bijeenkomst():
         #     classid = None
         if 'subject' in request.form:
             subjectid = request.form['subject']
+
         else:
-            subjectid = None
+            classid = None
 
         # validate the input
         if not title:
@@ -373,6 +373,7 @@ def plan_bijeenkomst():
         datemeeting = datetime.strptime(request.form['datemeeting'], '%Y-%m-%d')
         if datemeeting.date() < datetime.now().date():
             return 'De datum ligt in het verleden!'
+
         if not classids:
             return 'Selecteer welke klassen je verwacht'
         if not subjectid:
@@ -386,6 +387,9 @@ def plan_bijeenkomst():
         for classid in classids:
             cursor.execute("INSERT INTO meeting_classes (meetingid, classid) VALUES (?, ?)", (meetingid, classid))
 
+
+        db.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, classid) VALUES (?, ?, ?, ?, ?)",
+                   (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, classid))
         db.commit()
 
         return render_template("make_meeting_complete.html")

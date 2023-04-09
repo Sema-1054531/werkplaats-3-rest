@@ -27,6 +27,8 @@
     </div>
 </nav>
 <div class="container">
+        <form method="post" class="row g-3">
+        <div class="col-12">
         <form method="post" action="{{ url_for('check_in_student', meetingid=meetingid) }}" class="row g-3">
             <div class="col-12">
             <h2>{{ meeting.title }}</h2>
@@ -44,7 +46,7 @@
             <label for="lastname" class="form-label">Achternaam</label>
             <input type="text" class="form-control" id="lastname" name="lastname" value="{{ session['lastname'] }}" readonly>        </div>
         <div class="col-12">
-            <select class="form-select" name="progress" aria-label="Hoe sta je er voor">
+            <select class="form-select" id="progress" name="progress" aria-label="Hoe sta je er voor">
               <option disabled selected hidden>Hoe sta je er voor</option>
               <option value="Huiswerk is af">Huiswerk is af</option>
               <option value="Begonnen maar niet af">Begonnen maar niet af</option>
@@ -62,7 +64,6 @@
         <div class="col-12">
             <input type="submit" class="btn btn-primary" value="check in">
         </div>
-
     </form>
 </div>
 <script>
