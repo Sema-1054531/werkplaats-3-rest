@@ -157,7 +157,7 @@ def add_student():
     firstname = request.form['firstname']
     lastname = request.form['lastname']
     classid = request.form['classid']
-    conn = sqlite3.connect('databasewp3.db')
+    conn = sqlite3.connect('lib/databasewp3.db')
     c = conn.cursor()
     c.execute("INSERT INTO students (studentmail, firstname, lastname, classid) VALUES (?, ?, ?, ?)",
               (studentmail, firstname, lastname, classid))
