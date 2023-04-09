@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Lessen</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js" integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N" crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -26,22 +26,63 @@
         </div>
     </div>
 </nav>
+	<div class="container">
+		<table class="table table-striped" id="student-table">
+			<thead>
+				<tr>
+					<th scope="col">Meeting</th>
+                    <th scope="col">Vak</th>
+					<th scope="col">Datum</th>
+					<th scope="col">Begin tijd</th>
+					<th scope="col">Eind tijd</th>
+					<th scope="col">Docent</th>
+				</tr>
+			</thead>
+			<tbody id="lessons-list">
+            </tbody>
+		</table>
+	</div>
 
-    <button id="close-checkin">Check-in sluiten</button>
-
-<script>
-    $(document).ready(function () {
-        $("#close-checkin").click(function() {
+</div>
+    <script>
+        //  Function to get lessons from API function
+        function getLessons() {
             $.ajax({
-                type: "POST",
-                url: "/close_checkin",
-                success: function (response) {
-                    $("#greeting").text("De check-in is gesloten");
-                    $("#qr_image").remove();
+                url: '/api/lessons',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // List of lessons
+                    var lessons = data.lessons;
+                    for (var i = 0; i < lessons.length; i++) {
+                        var lesson = lessons[i];
+                        $('#lessons-list').append('<tr><td>' + lesson.title + '</td><td>' + lesson.subjectname + '</td><td>' + lesson.datemeeting + '</td><td>' + lesson.start_time + '</td><td>' + lesson.end_time + '</td><td>' + lesson.teachername + '</td><td><a href="/#?meetingid=' + lesson.id + '">details</a></td></tr>');                    }
                 }
             });
+        }
+
+        // Function to load lessons when page is loading
+        $(document).ready(function() {
+            getLessons();
         });
-    });
-</script>
+    </script>
+
+
+{#    <button id="close-checkin">Check-in sluiten</button>#}
+{##}
+{#<script>#}
+{#    $(document).ready(function () {#}
+{#        $("#close-checkin").click(function() {#}
+{#            $.ajax({#}
+{#                type: "POST",#}
+{#                url: "/close_checkin",#}
+{#                success: function (response) {#}
+{#                    $("#greeting").text("De check-in is gesloten");#}
+{#                    $("#qr_image").remove();#}
+{#                }#}
+{#            });#}
+{#        });#}
+{#    });#}
+{#</script>#}
 </body>
 </html>
