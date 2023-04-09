@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, g, redirect, session, json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask_restful import Resource, Api, reqparse, fields, marshal_with
 
@@ -10,6 +10,9 @@ app = Flask(__name__)
 app.config['DATABASE'] = os.path.join(os.getcwd(), 'lib/databasewp3.db')
 app.secret_key = os.urandom(24)
 api = Api(app)
+
+# Sessie timeout configuratie
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=604800)
 
 LISTEN_ALL = "0.0.0.0"
 FLASK_IP = LISTEN_ALL
@@ -56,18 +59,27 @@ def get_greeting():
 def login():
     db = get_db()
 
+    if 'studentid' in session:
+        return redirect('/roosteroverzicht_student')
+
     if request.method == 'POST':
         studentid = request.form['studentid']
         cursor = db.cursor()
         # Controleren of de ingevoerde e-mail en wachtwoord bestaan in de database
-        cursor.execute("SELECT studentid, classid FROM students WHERE studentid = ?", (studentid,))
+        cursor.execute("SELECT studentid, classid, firstname, lastname FROM students WHERE studentid = ?", (studentid,))
         student = cursor.fetchone()
 
         if student is not None:
             studentid = student[0]
             classid = student[1]
+            firstname = student[2]
+            lastname = student[3]
+
             session['studentid'] = studentid
             session['classid'] = classid
+            session['firstname'] = firstname
+            session['lastname'] = lastname
+
             return redirect('/roosteroverzicht_student')
         else:
             error = "Ongeldige inloggegevens. Probeer het opnieuw."
@@ -206,6 +218,53 @@ def plan_bijeenkomst():
     subjects = db.execute('SELECT * from subject').fetchall()
     return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
 
+# @app.route('/check-in', methods=['GET', 'POST'])
+# def checkin(meetingid):
+#     db = get_db()
+#
+#     # Get meeting object from the database based on meeting_id
+#     meeting = Meeting.query.get(meetingid)
+#
+#     # Check if meeting exists
+#     if not meeting:
+#         return 'Meeting not found', 404
+#
+#     # Get student information from the session, assuming it's stored as session variables
+#     student_id = session['studentid']
+#     firstname = session['firstname']
+#     lastname = session['lastname']
+#
+#     # Handle form submission
+#     if request.method == 'POST':
+#         studentid = request.form['studentid']
+#         firstname = request.form['firstname']
+#         lastname = request.form['lastname']
+#         progress = request.form['progress']
+#         checkin_date = request.form['checkin_date']
+#         checkin_time = request.form['checkin_time']
+#
+#         #validate the input
+#         if not studentid:
+#             return 'Er ging iets mis met het ophalen van je studentnummer'
+#         if not firstname:
+#             return 'Vul eerst je naam in'
+#         if not lastname:
+#             return 'Vul eerst je achternaam in'
+#         if not progress:
+#             return 'Vergeet niet aan te geven hoe je er voor staat'
+#         if not checkin_date:
+#             return 'Er ging iets mis met het ophalen van de datum van vandaag'
+#         if not checkin_time:
+#             return 'Er ging iets mis met het ophalen van de tijd'
+#
+#         db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time) VALUES (?, ?, ?, ?, ?, ?)",
+#                    (studentid, firstname, lastname, progress, checkin_date, checkin_time))
+#         db.commit()
+#
+#         return "Je bent ingescheckt voor vandaag!"
+#     return render_template('check-in-form-student.html', meeting=meeting, student_id=student_id, firstname=firstname,
+#                            lastname=lastname)
+
 @app.route("/check-in" , methods=['GET', 'POST'])
 def check_in_student():
     db = get_db()
@@ -217,6 +276,7 @@ def check_in_student():
         progress = request.form['progress']
         checkin_date = request.form['checkin_date']
         checkin_time = request.form['checkin_time']
+        meetingid = request.form['meetingid']
 
         #validate the input
         if not studentid:
@@ -232,13 +292,14 @@ def check_in_student():
         if not checkin_time:
             return 'Er ging iets mis met het ophalen van de tijd'
 
-        db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time) VALUES (?, ?, ?, ?, ?, ?)",
-                   (studentid, firstname, lastname, progress, checkin_date, checkin_time))
+        db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time, meetingid) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                   (studentid, firstname, lastname, progress, checkin_date, checkin_time, meetingid))
         db.commit()
 
         return "Je bent ingescheckt voor vandaag!"
+    meetingid = request.args.get('meetingid') or request.form.get('meetingid')
     meeting = db.execute('SELECT * FROM meeting').fetchall()
-    return render_template("check-in-form-student.html", meeting=meeting)
+    return render_template("check-in-form-student.html", meeting=meeting, meetingid=meetingid)
 
 
 # API endpoint to get meetings
