@@ -25,3 +25,5 @@ Genereer rapporten met de aanwezigheid van studenten
 
 
 # werkplaats-3-rest-one-piece
+Als student kan je inloggen als: 1054531@hr.nl of 1059571@hr.nl
+Als docent kan je inloggen als: 12345, 67890, 10101, 20202
