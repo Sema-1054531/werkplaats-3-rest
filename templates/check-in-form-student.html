@@ -27,10 +27,8 @@
     </div>
 </nav>
 <div class="container">
-        <form method="post" class="row g-3">
+    <form id="checkin-form" method="post" class="row g-3">
         <div class="col-12">
-        <form method="post" action="{{ url_for('check_in_student', meetingid=meetingid) }}" class="row g-3">
-            <div class="col-12">
             <h2>{{ meeting.title }}</h2>
         </div>
         <div class="col-12">
@@ -38,20 +36,24 @@
         </div>
         <div class="col-12">
             <label for="studentid" class="form-label">Studentnummer</label>
-            <input type="text" class="form-control" id="studentid" name="studentid" value="{{ session['studentid'] }}" readonly>        </div>
+            <input type="text" class="form-control" id="studentid" name="studentid" value="{{ session['studentid'] }}" readonly>
+        </div>
         <div class="col-md-6">
             <label for="firstname" class="form-label">Naam</label>
-            <input type="text" class="form-control" id="firstname" name="firstname" value="{{ session['firstname'] }}" readonly>        </div>
+            <input type="text" class="form-control" id="firstname" name="firstname" value="{{ session['firstname'] }}" readonly>
+        </div>
         <div class="col-md-6">
             <label for="lastname" class="form-label">Achternaam</label>
-            <input type="text" class="form-control" id="lastname" name="lastname" value="{{ session['lastname'] }}" readonly>        </div>
+            <input type="text" class="form-control" id="lastname" name="lastname" value="{{ session['lastname'] }}" readonly>
+        </div>
         <div class="col-12">
             <select class="form-select" id="progress" name="progress" aria-label="Hoe sta je er voor">
-              <option disabled selected hidden>Hoe sta je er voor</option>
-              <option value="Huiswerk is af">Huiswerk is af</option>
-              <option value="Begonnen maar niet af">Begonnen maar niet af</option>
-              <option value="Niet aan begonnen">Niet aan begonnen</option>
+                <option disabled selected hidden>Hoe sta je er voor</option>
+                <option value="Huiswerk is af">Huiswerk is af</option>
+                <option value="Begonnen maar niet af">Begonnen maar niet af</option>
+                <option value="Niet aan begonnen">Niet aan begonnen</option>
             </select>
+            <span id="progress-error" class="text-danger"></span> <!-- Error message -->
         </div>
         <div class="col-md-6">
             <label for="date" class="form-label">Datum</label>
@@ -75,6 +77,21 @@
     dateInput.value = now.toISOString().slice(0,10);
     var timeInput = document.getElementById('time');
     timeInput.value = now.toTimeString().slice(0,5);
+
+    // Form submission validation
+    var form = document.getElementById('checkin-form');
+    form.addEventListener('submit', function(event) {
+        var progressSelect = document.getElementById('progress');
+        var selectedOption = progressSelect.options[progressSelect.selectedIndex].value;
+        var errorSpan = document.getElementById('progress-error');
+
+        if (selectedOption === "Hoe sta je er voor") {
+            event.preventDefault(); // Prevent form submission
+            errorSpan.textContent = "Kies hier hoe je ervoor staat aub.";
+        } else {
+            errorSpan.textContent = ""; // Clear the error message if no error
+        }
+    });
 </script>
 </body>
 </html>
