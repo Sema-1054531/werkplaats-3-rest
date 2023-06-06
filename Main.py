@@ -398,20 +398,29 @@ def plan_bijeenkomst():
     return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
 
 
-@app.route("/check-in" , methods=['GET', 'POST'])
+@app.route("/check-in", methods=['GET', 'POST'])
 def check_in_student():
     db = get_db()
 
     if request.method == 'POST':
         studentid = request.form['studentid']
+        meetingid = request.form['meetingid']
+
+        # Controleer of de student al is ingecheckt voor de specifieke bijeenkomst
+        checkin_data = db.execute("SELECT is_checkedin FROM checkin WHERE studentid = ? AND meetingid = ?",
+                                  (studentid, meetingid)).fetchone()
+
+        if checkin_data is not None and int(checkin_data['is_checkedin']) == 1:
+            return 'Deze student is al ingecheckt voor deze bijeenkomst.'
+
         firstname = request.form['firstname']
         lastname = request.form['lastname']
         progress = request.form['progress']
         checkin_date = request.form['checkin_date']
         checkin_time = request.form['checkin_time']
-        meetingid = request.form['meetingid']
+        is_checkedin = request.form['is_checkedin']
 
-        #validate the input
+        # Valideer de invoer
         if not studentid:
             return 'Er ging iets mis met het ophalen van je studentnummer'
         if not firstname:
@@ -419,20 +428,22 @@ def check_in_student():
         if not lastname:
             return 'Vul eerst je achternaam in'
         if not progress:
-            return 'Vergeet niet aan te geven hoe je er voor staat'
+            return 'Vergeet niet aan te geven hoe je ervoor staat'
         if not checkin_date:
             return 'Er ging iets mis met het ophalen van de datum van vandaag'
         if not checkin_time:
             return 'Er ging iets mis met het ophalen van de tijd'
 
-        db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time, meetingid) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                   (studentid, firstname, lastname, progress, checkin_date, checkin_time, meetingid))
+        db.execute("INSERT INTO checkin (studentid, firstname, lastname, progress, checkin_date, checkin_time, meetingid, is_checkedin) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                   (studentid, firstname, lastname, progress, checkin_date, checkin_time, meetingid, is_checkedin))
         db.commit()
 
         return render_template("check-in-complete.html")
+
     meetingid = request.args.get('meetingid') or request.form.get('meetingid')
     meeting = db.execute('SELECT * FROM meeting').fetchall()
     return render_template("check-in-form-student.html", meeting=meeting, meetingid=meetingid)
+
 
 
 # API endpoint to get meetings
