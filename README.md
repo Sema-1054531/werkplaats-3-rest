@@ -28,3 +28,7 @@ Genereer rapporten met de aanwezigheid van studenten
 Als student kan je inloggen als: 1054531@hr.nl of 1059571@hr.nl
 
 Als docent kan je inloggen als: 12345, 67890, 10101, 20202
+
+
+# Bronnen
+https://chat.openai.com/ : Gebruikt voor het fixen van errors en het toevoegen van bootstrap.
