@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Aanmeldingen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js" integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N" crossorigin="anonymous"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('overzicht_docent') }}">Bijeenkomsten</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('plan_bijeenkomst') }}">Bijeenkomst plannen</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Log uit</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <h3>Aanmeldingen voor {{ meeting.title }}</h3>
+    <p>Datum: {{ meeting.datemeeting }} Tijd: {{ meeting.start_time }} - {{ meeting.end_time }}</p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Student Id</th>
+                <th scope="col">Voornaam</th>
+                <th scope="col">Achternaam</th>
+                <th scope="col">Prosess</th>
+                <th scope="col">Datum</th>
+                <th scope="col">Tijd</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for checkin in checkins %}
+                <tr>
+                    <td>{{ checkin.studentid }}</td>
+                    <td>{{ checkin.firstname }}</td>
+                    <td>{{ checkin.lastname }}</td>
+                    <td>{{ checkin.progress }}</td>
+                    <td>{{ checkin.checkin_date }}</td>
+                    <td>{{ checkin.checkin_time }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function getStudents() {
+        // Haal de meeting-ID op uit de URL-queryparameters
+        var urlParams = new URLSearchParams(window.location.search);
+        var meetingid = urlParams.get('meetingid');
+
+        if (meetingid !== null) {
+            console.log("URL:", '/overzicht_docent/aanmeldingen/' + meetingid);  // Voeg deze regel toe
+            // Maak een AJAX-aanroep om de aanmeldingsgegevens op te halen
+            $.ajax({
+                url: '/overzicht_docent/aanmeldingen/' + meetingid,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    // Verwerk de ontvangen aanmeldingsgegevens en toon ze op de pagina
+                    var checkins = data.checkins;
+                    for (var i = 0; i < checkins.length; i++) {
+                        var checkin = checkins[i];
+                        var row = '<tr>' +
+                            '<td>' + checkin.studentid + '</td>' +
+                            '<td>' + checkin.firstname + '</td>' +
+                            '<td>' + checkin.lastname + '</td>' +
+                            '<td>' + checkin.meetingid + '</td>' +
+                            '<td>' + checkin.checkin_date + '</td>' +
+                            '<td>' + checkin.checkin_time + '</td>' +
+                            '</tr>';
+                        $('#checkins-list').append(row);
+                        console.log("Meeting ID:", meetingid);  // Voeg deze regel toe
+                    }
+                }
+            });
+        }
+    }
+
+    // Functie om studenten te laden bij het laden van de pagina
+    $(document).ready(function () {
+        getStudents();
+    });
+</script>
+</body>
+</html>
