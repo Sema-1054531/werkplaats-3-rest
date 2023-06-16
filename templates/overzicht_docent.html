@@ -10,7 +10,7 @@
 <body>
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('overzicht_docent') }}">{{ session['firstname'] }} {{ session['lastname'] }}</a>
+        <a class="navbar-brand" href="#">{{ name }}</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -18,12 +18,6 @@
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('plan_bijeenkomst') }}">Bijeenkomst plannen</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('studentprogress') }}">Aanmeldingen</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('studentenoverzicht') }}">Overzicht studenten</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('logout') }}">Log uit</a>
@@ -49,9 +43,8 @@
 		</table>
 	</div>
 
-</div>
-    <script>
-        //  Function to get lessons from API function
+<script>
+        // Function to get lessons from API function
         function getLessons() {
             $.ajax({
                 url: '/api/lessons',
@@ -62,7 +55,9 @@
                     var lessons = data.lessons;
                     for (var i = 0; i < lessons.length; i++) {
                         var lesson = lessons[i];
-                        $('#lessons-list').append('<tr><td>' + lesson.title + '</td><td>' + lesson.subjectname + '</td><td>' + lesson.datemeeting + '</td><td>' + lesson.start_time + '</td><td>' + lesson.end_time + '</td><td>' + lesson.teachername + '</td><td><a href="/#?meetingid=' + lesson.id + '">details</a></td></tr>');                    }
+                        var checkinLink = '<a href="/overzicht_docent/aanmeldingen/' + lesson.id + '" class="checkin-link">aanmeldingen</a>';
+                        $('#lessons-list').append('<tr><td>' + lesson.title + '</td><td>' + lesson.subjectname + '</td><td>' + lesson.datemeeting + '</td><td>' + lesson.start_time + '</td><td>' + lesson.end_time + '</td><td>' + lesson.teachername + '</td><td>' + checkinLink + '</td></tr>');
+                    }
                 }
             });
         }

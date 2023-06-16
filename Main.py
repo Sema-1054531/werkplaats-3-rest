@@ -335,6 +335,47 @@ def overzicht_docent():
 def close_checkin():
     return render_template('check_in.html', message="De check-in is gesloten")
 
+@app.route("/overzicht_docent/aanmeldingen/<meetingid>", methods=["GET"])
+def get_checkins(meetingid):
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("SELECT * FROM checkin WHERE meetingid = ?", (meetingid,))
+    result = cursor.fetchall()
+
+    checkins = []
+    for row in result:
+        checkin = {
+            'checkinid': row['checkinid'],
+            'studentid': row['studentid'],
+            'firstname': row['firstname'],
+            'lastname': row['lastname'],
+            'checkin_date': row['checkin_date'],
+            'progress': row['progress'],
+            'checkin_time': row['checkin_time'],
+            'meetingid': row['meetingid'],
+            'subjectid': row['subjectid'],
+        }
+        checkins.append(checkin)
+
+    # Query to get the name of meeting
+    cursor.execute("SELECT * FROM meeting WHERE meetingid = ?", (meetingid,))
+    result_meeting = cursor.fetchone()
+
+    if result_meeting:
+        meeting = {
+            'title': result_meeting['title'],
+            'datemeeting': result_meeting['datemeeting'],
+            'start_time': result_meeting['start_time'],
+            'end_time': result_meeting['end_time'],
+        }
+    else:
+        meeting = None
+
+    cursor.close()
+    db.close()
+
+    return render_template('details_bijeenkomsten.html', meetingid=meetingid, checkins=checkins, meeting=meeting)
 
 @app.route('/plan_bijeenkomst', methods=['GET', 'POST'])
 def plan_bijeenkomst():
@@ -355,7 +396,6 @@ def plan_bijeenkomst():
         #     classid = None
         if 'subject' in request.form:
             subjectid = request.form['subject']
-
         else:
             subjectid = None
 
@@ -387,14 +427,14 @@ def plan_bijeenkomst():
         for classid in classids:
             cursor.execute("INSERT INTO meeting_classes (meetingid, classid) VALUES (?, ?)", (meetingid, classid))
 
-
-        # db.execute("INSERT INTO meeting (title, datemeeting, start_time, end_time, classid) VALUES (?, ?, ?, ?, ?)",
-        #            (title, datemeeting.strftime('%Y-%m-%d'), start_time, end_time, classid))
         db.commit()
+        cursor.close()
+        db.close()
 
         return render_template("make_meeting_complete.html")
     classes = db.execute('SELECT * from class ORDER BY classname').fetchall()
     subjects = db.execute('SELECT * from subject').fetchall()
+    db.close()
     return render_template("bijeenkomst_plannen.html", classes=classes, subjects=subjects)
 
 

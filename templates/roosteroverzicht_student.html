@@ -54,7 +54,14 @@
                     var lessons = data.lessons;
                     for (var i = 0; i < lessons.length; i++) {
                         var lesson = lessons[i];
-                        $('#lessons-list').append('<tr><td>' + lesson.title + '</td><td>' + lesson.subjectname + '</td><td>' + lesson.datemeeting + '</td><td>' + lesson.start_time + '</td><td>' + lesson.end_time + '</td><td>' + lesson.teachername + '</td><td><a href="/check-in?meetingid=' + lesson.id + '">Inchecken</a></td></tr>');                    }
+                        $('#lessons-list').append('<tr>' +
+                            '<td>' + lesson.title + '</td>' +
+                            '<td>' + lesson.subjectname + '</td>' +
+                            '<td>' + lesson.datemeeting + '</td>' +
+                            '<td>' + lesson.start_time + '</td>' +
+                            '<td>' + lesson.end_time + '</td>' +
+                            '<td>' + lesson.teachername + '</td>' +
+                            '<td><a href="/check-in?meetingid=' + lesson.id + '">Inchecken</a></td></tr>');                    }
                 }
             });
         }
